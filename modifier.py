@@ -190,8 +190,11 @@ class Modifier():
     def showDirection(self, direction):
         counter = 0
         positions = self.__searchDirection(direction)
-        for element in positions:
-            print(self.__segments[int(element[0])])
+        if positions != None:
+            for element in positions:
+                print(self.__segments[int(element[0])])
+        else:
+            print('{} is not used'.format(direction))
             
             
     def __isLine(self, data):
