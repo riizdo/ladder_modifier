@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-from tkinter.filedialog import askopenfilename, askdirectory
+from tkinter.filedialog import askopenfilename
 import modifier
 
 
@@ -26,7 +26,7 @@ class Screen(Frame):
     
     
     def __loadFile(self):
-        file = askopenfilename(filetypes=(('Ladder files', '*.LST'), ('All files', '*.*')))
+        file = askopenfilename(filetypes=(('Ladder files', '*.LST'), ('Job files', '*.JBI'), ('All files', '*.*')))
         error = self.__ladder.readFile(file)
         if error != 'ok':
             return 'error load file'
@@ -36,7 +36,9 @@ class Screen(Frame):
         print(self.__ladder.getSegments())
         textEditor.insert('insert', self.__ladder.getProgram())
         self.__textEditor.append(textEditor)
-        self.__noteBook.add(self.__textEditor[len(self.__textEditor) -1], text = 'title')
+        self.__noteBook.add(self.__textEditor[len(self.__textEditor) -1], text = self.__ladder.file())
+        self.__noteBook.select(self.__textEditor[len(self.__textEditor) -1])
+        self.__noteBook.tab(0, option=X)
         
         return 'ok'
         

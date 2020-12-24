@@ -272,7 +272,9 @@ class Modifier():
     
     def file(self, file = None):
         if file == None:
-            return self.__file
+            partsFile = self.__file.split('/')
+            latest = len(partsFile) -1
+            return partsFile[latest]
         else:
             self.__file = file
         
