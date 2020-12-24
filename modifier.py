@@ -272,6 +272,8 @@ class Modifier():
     
     def file(self, file = None):
         if file == None:
+            if self.__file == None or self.__file == '':
+                return None
             partsFile = self.__file.split('/')
             latest = len(partsFile) -1
             return partsFile[latest]
