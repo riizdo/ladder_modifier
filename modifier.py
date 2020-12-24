@@ -15,6 +15,7 @@ class Modifier():
         self.__menus = ('CHANGE', 'CONSULT', 'EXIT')
         self.__instructions = ('STR', 'GSTR', 'OUT', 'GOUT', 'AND', 'OR', 'AND-NOT', 'OR-NOT', 'OR-STR', 'AND-STR', 'STR-NOT', 'PART')
         self.__consDirections = {}
+        self.__file = ''
         
         self.__consDirections['general input'] = ['input', 10, 2567]
         self.__consDirections['general output'] = ['output', 10010, 12567]
@@ -212,8 +213,11 @@ class Modifier():
         counter = 0
         outList = []
         program = []
+        self.__file = file
+        
         try:
             with open(file) as f:
+                self.__simpleProgram = f.read()
                 for line in f:
                     self.__program.append(line)
                     treatLine = self.__comproveLine(line)
@@ -223,9 +227,10 @@ class Modifier():
                     counter += 1
         except:
             print('the file no exist or the path is incorrect')
-            self.exit()
+            return 'read file failed'
         
         self.__formSegments(program, outList)
+        return 'ok'
         
         
     def writeFile(self, file):
@@ -258,11 +263,18 @@ class Modifier():
     
     
     def getProgram(self):
-        return self.__program
+        return self.__simpleProgram
     
     
     def getSegments(self):
         return self.__segments
+    
+    
+    def file(self, file = None):
+        if file == None:
+            return self.__file
+        else:
+            self.__file = file
         
     
     

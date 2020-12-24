@@ -1,30 +1,57 @@
 from tkinter import *
+from tkinter import ttk
 from tkinter.filedialog import askopenfilename, askdirectory
+import modifier
 
 
 class Screen(Frame):
     def __init__(self, master = None):
         Frame.__init__(self, master)
+        self.__title = 'Ladder Modifier -'
         self.pack()
         self.master.geometry('1200x600+0+0')
-        self.master.title('Ladder Modifier')
+        self.master.title(self.__title + ' ' + 'no project')
+        
+        self.__ladder = modifier.Modifier()
         
         self.__createMenuBar()
         
+        self.__textEditor = []
         
+        self.__noteBook = ttk.Notebook(master)
+        self.__noteBook.pack(anchor = NW)
+            
         self.p = Button(self, text = 'hola', width = 10)
         self.p.pack()
     
     
     def __loadFile(self):
-        file = askopenfilename(filetypes=(("Ladder files", "*.LST"), ("All files", "*.*") ))
+        file = askopenfilename(filetypes=(('Ladder files', '*.LST'), ('All files', '*.*')))
+        error = self.__ladder.readFile(file)
+        if error != 'ok':
+            return 'error load file'
+        
+        self.master.title(self.__title + ' ' + file)
+        textEditor = Text(self.__noteBook)
+        print(self.__ladder.getSegments())
+        textEditor.insert('insert', self.__ladder.getProgram())
+        self.__textEditor.append(textEditor)
+        self.__noteBook.add(self.__textEditor[len(self.__textEditor) -1], text = 'title')
+        
+        return 'ok'
         
         
     def __saveFile(self):
-        pass
+        file = self.__ladder.file()
+        self.ladder.writeFile(file)
     
     
     def __saveAs(self):
+        file = asksaveasfilename()
+        self.__ladder.writeFile(file)
+    
+    
+    def __exit(self):
         pass
         
         
@@ -37,6 +64,8 @@ class Screen(Frame):
         self.__fileMenu.add_command(label = 'Abrir', command = self.__loadFile)
         self.__fileMenu.add_command(label = 'Guardar', command = self.__saveFile)
         self.__fileMenu.add_command(label = 'Guardar como..', command = self.__saveAs)
+        self.__fileMenu.add_separator()
+        self.__fileMenu.add_command(label = 'Salir', command = self.__exit)
         
         self.__editMenu = Menu(self.__menuBar, tearoff = 0)
         self.__menuBar.add_cascade(label = 'Editar', menu = self.__editMenu)
