@@ -4,9 +4,26 @@
 #description: modifier for ladder program in motoman's robots
 
 
-
-class Modifier():
+class Program():
     def __init__(self):
+        self.fileName = ''
+    
+    
+    def file(self, file = None):
+        if file == None:
+            if self.fileName == None or self.fileName == '':
+                return None
+            partsFile = self.fileName.split('/')
+            latest = len(partsFile) -1
+            return partsFile[latest]
+        else:
+            self.fileName = file
+            
+            
+        
+class Ladder(Program):
+    def __init__(self):
+        Program.__init__(self)
         self.__version = 0
         self.__header = 'is a program to simplify the modification of the motoman ladder, version: {}.'.format(self.__version)
         self.__path = ''
@@ -15,7 +32,6 @@ class Modifier():
         self.__menus = ('CHANGE', 'CONSULT', 'EXIT')
         self.__instructions = ('STR', 'GSTR', 'OUT', 'GOUT', 'AND', 'OR', 'AND-NOT', 'OR-NOT', 'OR-STR', 'AND-STR', 'STR-NOT', 'PART')
         self.__consDirections = {}
-        self.__file = ''
         
         self.__consDirections['general input'] = ['input', 10, 2567]
         self.__consDirections['general output'] = ['output', 10010, 12567]
@@ -213,7 +229,7 @@ class Modifier():
         counter = 0
         outList = []
         program = []
-        self.__file = file
+        self.fileName = file
         
         try:
             with open(file) as f:
@@ -268,22 +284,11 @@ class Modifier():
     
     def getSegments(self):
         return self.__segments
-    
-    
-    def file(self, file = None):
-        if file == None:
-            if self.__file == None or self.__file == '':
-                return None
-            partsFile = self.__file.split('/')
-            latest = len(partsFile) -1
-            return partsFile[latest]
-        else:
-            self.__file = file
         
     
     
 if __name__ == '__main__':
-    app = Modifier()
+    app = Ladder()
     print('')
     app.readFile(input('enter the name of archive: '))
     

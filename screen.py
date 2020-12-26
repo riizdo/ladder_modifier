@@ -13,6 +13,9 @@ class Screen(Frame):
         self.master.geometry('1200x600+0+0')
         
         self.__indexMenuBar = []
+        self.__indexFileMenu = []
+        self.__indexOptionMenu = []
+        self.__indexLanguageMenu = []
         self.__texts = text.TextLibrary()
         
         self.master.title(self.__title + ' ' + self.__texts.getText('No project'))
@@ -21,7 +24,7 @@ class Screen(Frame):
         self.__languageSelected = 'English'
         self.__text = {}
         
-        self.__ladder = modifier.Modifier()
+        self.__ladder = modifier.Ladder()
         
         self.__createMenuBar()
         
@@ -35,14 +38,17 @@ class Screen(Frame):
     
     
     def __loadFile(self):
-        file = askopenfilename(filetypes=(('Ladder files', '*.LST'), ('Job files', '*.JBI'), ('All files', '*.*')))
+        file = askopenfilename(title = self.__texts.getText('Open'), filetypes=((self.__texts.getText('Ladder files'), '*.LST'),\
+                                          (self.__texts.getText('Job files'), '*.JBI'),\
+                                          (self.__texts.getText('All files'), '*.*')))
+        if file == None or file == ():
+            return 'no file select'
         error = self.__ladder.readFile(file)
         if error != 'ok':
             return 'error load file'
         
         self.master.title(self.__title + ' ' + file)
         textEditor = Text(self.__noteBook)
-        print(self.__ladder.getSegments())
         textEditor.insert('insert', self.__ladder.getProgram())
         self.__textEditor.append(textEditor)
         self.__noteBook.add(self.__textEditor[len(self.__textEditor) -1], text = self.__ladder.file())
@@ -66,7 +72,7 @@ class Screen(Frame):
     
     
     def __exit(self):
-        pass
+        self.master.destroy()
         
         
     def __createMenuBar(self):
@@ -76,12 +82,17 @@ class Screen(Frame):
         self.__fileMenu = Menu(self.__menuBar, tearoff = 0)
         self.__menuBar.add_cascade(label = self.__texts.getText('File'), menu = self.__fileMenu)
         self.__indexMenuBar.append(self.__menuBar.index(self.__texts.getText('File')))
-        self.__fileMenu.add_command(label = 'Abrir', command = self.__loadFile)
-        self.__fileMenu.add_command(label = 'Cerrar', command = self.__closeFile)
-        self.__fileMenu.add_command(label = 'Guardar', command = self.__saveFile)
-        self.__fileMenu.add_command(label = 'Guardar como..', command = self.__saveAs)
+        self.__fileMenu.add_command(label = self.__texts.getText('Open'), command = self.__loadFile)
+        self.__indexFileMenu.append(self.__fileMenu.index(self.__texts.getText('Open')))
+        self.__fileMenu.add_command(label = self.__texts.getText('Close'), command = self.__closeFile)
+        self.__indexFileMenu.append(self.__fileMenu.index(self.__texts.getText('Close')))
+        self.__fileMenu.add_command(label = self.__texts.getText('Save'), command = self.__saveFile)
+        self.__indexFileMenu.append(self.__fileMenu.index(self.__texts.getText('Save')))
+        self.__fileMenu.add_command(label = self.__texts.getText('Save as'), command = self.__saveAs)
+        self.__indexFileMenu.append(self.__fileMenu.index(self.__texts.getText('Save as')))
         self.__fileMenu.add_separator()
-        self.__fileMenu.add_command(label = 'Salir', command = self.__exit)
+        self.__fileMenu.add_command(label = self.__texts.getText('Exit'), command = self.__exit)
+        self.__indexFileMenu.append(self.__fileMenu.index(self.__texts.getText('Exit')))
         
         self.__editMenu = Menu(self.__menuBar, tearoff = 0)
         self.__menuBar.add_cascade(label = self.__texts.getText('Edit'), menu = self.__editMenu)
@@ -91,28 +102,28 @@ class Screen(Frame):
         self.__menuBar.add_cascade(label = self.__texts.getText('Options'), menu = self.__optionMenu)
         self.__indexMenuBar.append(self.__menuBar.index('Options'))
         self.__languageMenu = Menu(self.__optionMenu, tearoff = 0)
-        self.__optionMenu.add_cascade(label = 'Idioma', menu = self.__languageMenu)
-        self.__languageMenu.add_command(label = 'Ingles', command = self.__selectLanguageEnglish)
-        self.__languageMenu.add_command(label = 'Español', command = self.__selectLanguageSpanish)
+        self.__optionMenu.add_cascade(label = self.__texts.getText('Language'), menu = self.__languageMenu)
+        self.__indexOptionMenu.append(self.__optionMenu.index(self.__texts.getText('Language')))
+        self.__languageMenu.add_command(label = self.__texts.getText('English'), command = self.__selectLanguageEnglish)
+        self.__indexLanguageMenu.append(self.__languageMenu.index(self.__texts.getText('English')))
+        self.__languageMenu.add_command(label = self.__texts.getText('Spanish'), command = self.__selectLanguageSpanish)
+        self.__indexLanguageMenu.append(self.__languageMenu.index(self.__texts.getText('Spanish')))
         
         
     def __selectLanguageEnglish(self):
         language = self.__texts.languagesList()[0]
         error = self.__texts.language(language)
-        print(error)
         self.__chargeTexts()
     
     
     def __selectLanguageSpanish(self):
         language = self.__texts.languagesList()[1]
-        print(language)
         error = self.__texts.language(language)
-        print(error)
         self.__chargeTexts()
         
         
     def __chargeTexts(self):
-        if self.__ladder.file() == None:
+        if self.__ladder.file() == None or self.__ladder.file() == '':
             self.master.title(self.__title + ' ' + self.__texts.getText('No project'))
         text = self.__texts.getText()
         
@@ -120,13 +131,18 @@ class Screen(Frame):
         self.__menuBar.entryconfig(self.__indexMenuBar[1], label = self.__texts.getText('Edit'))
         self.__menuBar.entryconfig(self.__indexMenuBar[2], label = self.__texts.getText('Options'))
         
+        self.__fileMenu.entryconfig(self.__indexFileMenu[0], label = self.__texts.getText('Open'))
+        self.__fileMenu.entryconfig(self.__indexFileMenu[1], label = self.__texts.getText('Close'))
+        self.__fileMenu.entryconfig(self.__indexFileMenu[2], label = self.__texts.getText('Save'))
+        self.__fileMenu.entryconfig(self.__indexFileMenu[3], label = self.__texts.getText('Save as'))
+        self.__fileMenu.entryconfig(self.__indexFileMenu[4], label = self.__texts.getText('Exit'))
+        
+        self.__optionMenu.entryconfig(self.__indexOptionMenu[0], label = self.__texts.getText('Language'))
+        
+        self.__languageMenu.entryconfig(self.__indexLanguageMenu[0], label = self.__texts.getText('English'))
+        self.__languageMenu.entryconfig(self.__indexLanguageMenu[1], label = self.__texts.getText('Spanish'))
+        
     
-    def destroyElement(self, element):
-        element.destroy()
-        
-        
-    def main(self):
-        pass
         
 
 if __name__ == '__main__':
