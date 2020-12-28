@@ -24,11 +24,10 @@ class Screen(Frame):
         self.__languageSelected = 'English'
         self.__text = {}
         
-        self.__ladder = modifier.Ladder()
-        
         self.__createMenuBar()
         
         self.__textEditor = []
+        self.__programs = {}
         
         self.__noteBook = ttk.Notebook(master)
         self.__noteBook.pack(anchor = NW)
@@ -38,37 +37,48 @@ class Screen(Frame):
     
     
     def __loadFile(self):
+        error = ''
         file = askopenfilename(title = self.__texts.getText('Open'), filetypes=((self.__texts.getText('Ladder files'), '*.LST'),\
                                           (self.__texts.getText('Job files'), '*.JBI'),\
                                           (self.__texts.getText('All files'), '*.*')))
         if file == None or file == ():
             return 'no file select'
-        error = self.__ladder.readFile(file)
+        
+        partFile = file.split('/')
+        partFile = partFile[len(partFile) - 1]
+        extFile = partFile.split('.')
+        extFile = partFile[len(partFile) - 1]
+        
+        if extFile == 'LST':
+            self.__programs[partFile] = modifier.Ladder()
+            error = self.__programs[partFile].readFile(file)
         if error != 'ok':
-            return 'error load file'
+            return error
         
         self.master.title(self.__title + ' ' + file)
         textEditor = Text(self.__noteBook)
-        textEditor.insert('insert', self.__ladder.getProgram())
+        textEditor.insert('insert', self.__programs[partFile].getProgram())
         self.__textEditor.append(textEditor)
-        self.__noteBook.add(self.__textEditor[len(self.__textEditor) -1], text = self.__ladder.file())
+        self.__noteBook.add(self.__textEditor[len(self.__textEditor) -1], text = self.__programs[partFile].file())
         self.__noteBook.select(self.__textEditor[len(self.__textEditor) -1])
         
         return 'ok'
     
     
     def __closeFile(self):
-        pass
+        self.__noteBook.forget(self.__noteBook.select())
         
         
     def __saveFile(self):
-        file = self.__ladder.file()
-        self.ladder.writeFile(file)
+        program = self.__noteBook.select()
+        file = self.__programs[program].file()
+        self.__programs[program].writeFile(file)
     
     
     def __saveAs(self):
         file = asksaveasfilename()
-        self.__ladder.writeFile(file)
+        program = self.__noteBook.select()
+        self.__programs[program].writeFile(file)
     
     
     def __exit(self):
@@ -123,9 +133,9 @@ class Screen(Frame):
         
         
     def __chargeTexts(self):
-        if self.__ladder.file() == None or self.__ladder.file() == '':
+        if self.__programs == {}:
             self.master.title(self.__title + ' ' + self.__texts.getText('No project'))
-        text = self.__texts.getText()
+        #text = self.__texts.getText()
         
         self.__menuBar.entryconfig(self.__indexMenuBar[0], label = self.__texts.getText('File'))
         self.__menuBar.entryconfig(self.__indexMenuBar[1], label = self.__texts.getText('Edit'))

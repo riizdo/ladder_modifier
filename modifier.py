@@ -7,6 +7,9 @@
 class Program():
     def __init__(self):
         self.fileName = ''
+        self.simpleProgram
+        self.consDirections = {}
+        self.instructions = []
     
     
     def file(self, file = None):
@@ -20,6 +23,13 @@ class Program():
             self.fileName = file
             
             
+    def getTypeFile(self):
+        partFile = self.fileName.split('.')
+        return partFile[len(partFile) - 1]
+            
+            
+            
+            
         
 class Ladder(Program):
     def __init__(self):
@@ -30,25 +40,25 @@ class Ladder(Program):
         self.__program = []
         self.__segments = []
         self.__menus = ('CHANGE', 'CONSULT', 'EXIT')
-        self.__instructions = ('STR', 'GSTR', 'OUT', 'GOUT', 'AND', 'OR', 'AND-NOT', 'OR-NOT', 'OR-STR', 'AND-STR', 'STR-NOT', 'PART')
-        self.__consDirections = {}
+        self.instructions = ['STR', 'GSTR', 'OUT', 'GOUT', 'AND', 'OR', 'AND-NOT', 'OR-NOT', 'OR-STR', 'AND-STR', 'STR-NOT', 'PART']
         
-        self.__consDirections['general input'] = ['input', 10, 2567]
-        self.__consDirections['general output'] = ['output', 10010, 12567]
-        self.__consDirections['external input'] = ['input', 20010, 22567]
-        self.__consDirections['external output'] = ['output', 30010, 32567]
-        self.__consDirections['specific input'] = ['input', 40010, 41607]
-        self.__consDirections['specific output'] = ['output', 50010, 52007]
-        self.__consDirections['interface panel input'] = ['input', 60010, 60647]
-        self.__consDirections['auxiliary relay'] = ['input/output', 70010, 79997]
-        self.__consDirections['control status'] = ['', 80010, 80647]
-        self.__consDirections['pseudo input'] = ['input', 82010, 82207]
-        self.__consDirections['network input'] = ['input', 25010, 27567]
-        self.__consDirections['network output'] = ['output', 35010, 37567]
-        #self.__consDirections['general registrer'] = ['input/output', 'm000', 'm559']
-        #self.__consDirections['analog input registrer'] = ['input', 'm600', 'm639']
-        #self.__consDirections['analog output registrer'] = ['output', 'm560', 'm599']
-        #self.__consDirections['system registrer'] = ['', 'm640', 'm999']
+        
+        self.consDirections['general input'] = ['input', 10, 2567]
+        self.consDirections['general output'] = ['output', 10010, 12567]
+        self.consDirections['external input'] = ['input', 20010, 22567]
+        self.consDirections['external output'] = ['output', 30010, 32567]
+        self.consDirections['specific input'] = ['input', 40010, 41607]
+        self.consDirections['specific output'] = ['output', 50010, 52007]
+        self.consDirections['interface panel input'] = ['input', 60010, 60647]
+        self.consDirections['auxiliary relay'] = ['input/output', 70010, 79997]
+        self.consDirections['control status'] = ['', 80010, 80647]
+        self.consDirections['pseudo input'] = ['input', 82010, 82207]
+        self.consDirections['network input'] = ['input', 25010, 27567]
+        self.consDirections['network output'] = ['output', 35010, 37567]
+        #self.consDirections['general registrer'] = ['input/output', 'm000', 'm559']
+        #self.consDirections['analog input registrer'] = ['input', 'm600', 'm639']
+        #self.consDirections['analog output registrer'] = ['output', 'm560', 'm599']
+        #self.consDirections['system registrer'] = ['', 'm640', 'm999']
         
         
     def __str__(self):
@@ -63,7 +73,8 @@ class Ladder(Program):
             pos = []
             for line in segment:
                 if (direction == line[1] and line[0] != 'GSTR' and line[0] != 'GOUT')\
-                   or ((line[0] == 'GSTR' or line[0] == 'GOUT') and int(line[1]) <= int(direction) and int(self.__addStr(line[1], 7)) >= int(direction)):
+                   or ((line[0] == 'GSTR' or line[0] == 'GOUT') and int(line[1]) <= int(direction)\
+                       and int(self.__addStr(line[1], 7)) >= int(direction)):
                     pos.append(counterSegment)
                     pos.append(counterLine)
                     positions.append(pos)
@@ -92,11 +103,11 @@ class Ladder(Program):
             
             tDir1 = ''
             tDir2 = ''
-            for element in self.__consDirections:
-                if dir1 > self.__consDirections[element][1] and dir1 < self.__consDirections[element][2]:
-                    tDir1 = self.__consDirections[element][0]
-                if dir2 > self.__consDirections[element][1] and dir2 < self.__consDirections[element][2]:
-                    tDir2 = self.__consDirections[element][0]
+            for element in self.consDirections:
+                if dir1 > self.consDirections[element][1] and dir1 < self.consDirections[element][2]:
+                    tDir1 = self.consDirections[element][0]
+                if dir2 > self.consDirections[element][1] and dir2 < self.consDirections[element][2]:
+                    tDir2 = self.consDirections[element][0]
             if tDir1 == tDir2 and tDir1 == 'input':
                 return 'the two directions are inputs, it is incorrect'
             elif tDir1 == tDir2 and tDir1 == 'output':
@@ -215,7 +226,7 @@ class Ladder(Program):
             
             
     def __isLine(self, data):
-        for text in self.__instructions:
+        for text in self.instructions:
             if data == text:
                 return True
         return False
@@ -229,11 +240,11 @@ class Ladder(Program):
         counter = 0
         outList = []
         program = []
-        self.fileName = file
         
         try:
             with open(file) as f:
-                self.__simpleProgram = f.read()
+                self.simpleProgram = f.read()
+                self.fileName = file
                 for line in f:
                     self.__program.append(line)
                     treatLine = self.__comproveLine(line)
@@ -279,12 +290,36 @@ class Ladder(Program):
     
     
     def getProgram(self):
-        return self.__simpleProgram
+        return self.simpleProgram
     
     
     def getSegments(self):
         return self.__segments
+    
+    
+    
+    
+    
+class Job(Program):
+    def __init__():
+        Program.__init__(self)
         
+        
+    def readFile(self, file = None):
+        if file == None:
+            if self.fileName == None or self.fileName == '':
+                return 'read file failed'
+            file = self.fileName
+        
+        try:
+            with open (file) as f:
+                self.simpleProgram = f.read()
+                self.fileName = file
+        except:
+            return 'read file failed'
+        
+    
+    
     
     
 if __name__ == '__main__':
