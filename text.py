@@ -53,3 +53,5 @@ class TextLibrary():
         self.__texts['Ladder files'] = {self.__languages[0]: 'Ladder files', self.__languages[1]: 'Archivos ladder'}
         self.__texts['Job files'] = {self.__languages[0]: 'Job files', self.__languages[1]: 'Archivos de programa'}
         self.__texts['All files'] = {self.__languages[0]: 'All files', self.__languages[1]: 'Todos los archivos'}
+        
+        

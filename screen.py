@@ -11,6 +11,7 @@ class Screen(Frame):
         self.__title = 'Ladder Modifier -'
         self.pack()
         self.master.geometry('1200x600+0+0')
+        #self.__fontInstruction = Font('arial')
         
         self.__indexMenuBar = []
         self.__indexFileMenu = []
@@ -26,7 +27,7 @@ class Screen(Frame):
         
         self.__createMenuBar()
         
-        self.__textEditor = []
+        self.__textEditor = {}
         self.__programs = {}
         
         self.__noteBook = ttk.Notebook(master)
@@ -47,23 +48,68 @@ class Screen(Frame):
         partFile = file.split('/')
         partFile = partFile[len(partFile) - 1]
         extFile = partFile.split('.')
-        extFile = partFile[len(partFile) - 1]
+        extFile = extFile[len(extFile) - 1]
+        #print(extFile, partFile)
         
         if extFile == 'LST':
             self.__programs[partFile] = modifier.Ladder()
             error = self.__programs[partFile].readFile(file)
+        elif extFile == 'JBI':
+            self.__programs[partFile] = modifier.Job()
+            error = self.__programs[partFile].readFile(file)
         if error != 'ok':
+            print(error)
             return error
         
         self.master.title(self.__title + ' ' + file)
-        textEditor = Text(self.__noteBook)
-        textEditor.insert('insert', self.__programs[partFile].getProgram())
-        self.__textEditor.append(textEditor)
-        self.__noteBook.add(self.__textEditor[len(self.__textEditor) -1], text = self.__programs[partFile].file())
-        self.__noteBook.select(self.__textEditor[len(self.__textEditor) -1])
+        self.__textEditor[partFile] = Text(self.__noteBook)
+        self.__textEditor[partFile].insert('insert', self.__programs[partFile].getProgram())
+        self.__defineColourProgram(partFile)
+        self.__noteBook.add(self.__textEditor[partFile], text = self.__programs[partFile].file())
+        self.__noteBook.select(self.__textEditor[partFile])
         
         return 'ok'
     
+    
+    def __defineColourProgram(self, program):
+        nInstruction = 0
+        posIni = '1.0'
+        
+        self.__textEditor[program].tag_config('instruction', foreground = 'blue')
+        self.__textEditor[program].tag_config('text', foreground = 'black')
+        self.__textEditor[program].tag_config('comment', foreground = 'grey')
+        
+        instructions = self.__programs[program].getInstructions()
+        instruction = r'\y(?:{})\y'.format('|'.join(instructions))
+        #instruction = '|'.join(instructions)
+        countVar = StringVar()
+        while True:
+            instruction = instructions[nInstruction] + ' '
+            pos = self.__textEditor[program].search(instruction, posIni, count = countVar)
+            print(pos, instruction, countVar.get())
+            if not pos or pos == '' or self.__compareStr(pos, posIni):
+                nInstruction += 1
+                posIni = '1.0'
+                #break
+                if nInstruction >= len(instructions):
+                    break
+            else:
+                posEnd = '{} + {}c'.format(pos, countVar.get())
+                self.__textEditor[program].tag_add('instruction', pos, posEnd)
+                #t = self.__textEditor[program].get(pos, posEnd)
+                #self.__textEditor[program].delete(pos, posEnd)
+                posIni = pos.split('.')
+                posIni = int(posIni[0]) + 1
+                posIni = str(posIni) + '.0'
+                print(pos, posIni, instruction)
+                
+                
+    def __compareStr(self, str1, str2):
+        num1 = float(str1)
+        num2 = float(str2)
+        
+        return num1 < num2
+                    
     
     def __closeFile(self):
         self.__noteBook.forget(self.__noteBook.select())

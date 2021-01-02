@@ -7,9 +7,11 @@
 class Program():
     def __init__(self):
         self.fileName = ''
-        self.simpleProgram
+        self.simpleProgram = ''
         self.consDirections = {}
         self.instructions = []
+        self.iniProgram = ''
+        self.endProgram = ''
     
     
     def file(self, file = None):
@@ -26,6 +28,22 @@ class Program():
     def getTypeFile(self):
         partFile = self.fileName.split('.')
         return partFile[len(partFile) - 1]
+    
+    
+    def getProgram(self):
+        return self.simpleProgram
+    
+    
+    def getInstructions(self):
+        return self.instructions
+    
+    
+    def getIniProgram(self):
+        return self.iniProgram
+    
+    
+    def getEndProgram(self):
+        return self.endProgram
             
             
             
@@ -41,6 +59,8 @@ class Ladder(Program):
         self.__segments = []
         self.__menus = ('CHANGE', 'CONSULT', 'EXIT')
         self.instructions = ['STR', 'GSTR', 'OUT', 'GOUT', 'AND', 'OR', 'AND-NOT', 'OR-NOT', 'OR-STR', 'AND-STR', 'STR-NOT', 'PART']
+        self.iniProgram = ''
+        self.endProgram = 'END'
         
         
         self.consDirections['general input'] = ['input', 10, 2567]
@@ -289,8 +309,7 @@ class Ladder(Program):
         return self.__menus
     
     
-    def getProgram(self):
-        return self.simpleProgram
+    
     
     
     def getSegments(self):
@@ -301,11 +320,15 @@ class Ladder(Program):
     
     
 class Job(Program):
-    def __init__():
+    def __init__(self):
         Program.__init__(self)
+        self.instructions = ['IF', 'SET', 'GET', 'SETE', 'MUL', 'GETS', 'GETE', 'IFTHEN', 'ENDIF', 'REFP', 'DOUT', 'WAIT']
+        self.iniProgram = 'NOP'
+        self.endProgram = 'END'
         
         
     def readFile(self, file = None):
+        print(file)
         if file == None:
             if self.fileName == None or self.fileName == '':
                 return 'read file failed'
@@ -317,6 +340,14 @@ class Job(Program):
                 self.fileName = file
         except:
             return 'read file failed'
+        return 'ok'
+        
+        
+    def writeFile(self, file = None):
+        if file == None:
+            file = self.fileName
+            
+            
         
     
     
