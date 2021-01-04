@@ -10,6 +10,7 @@ class Program():
         self.simpleProgram = ''
         self.consDirections = {}
         self.instructions = []
+        self.movements = []
         self.iniProgram = ''
         self.endProgram = ''
     
@@ -36,6 +37,10 @@ class Program():
     
     def getInstructions(self):
         return self.instructions
+    
+    
+    def getMovements(self):
+        return self.movements
     
     
     def getIniProgram(self):
@@ -322,7 +327,8 @@ class Ladder(Program):
 class Job(Program):
     def __init__(self):
         Program.__init__(self)
-        self.instructions = ['IF', 'SET', 'GET', 'SETE', 'MUL', 'GETS', 'GETE', 'IFTHEN', 'ENDIF', 'REFP', 'DOUT', 'WAIT']
+        self.instructions = ['IF', 'SET', 'GET', 'SETE', 'MUL', 'GETS', 'GETE', 'IFTHEN', 'ENDIF', 'REFP', 'DOUT', 'WAIT', 'PULSE']
+        self.movements = ['MOVJ', 'MOVL', 'MOVC', 'IMOV']
         self.iniProgram = 'NOP'
         self.endProgram = 'END'
         

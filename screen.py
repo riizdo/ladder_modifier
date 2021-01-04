@@ -74,19 +74,29 @@ class Screen(Frame):
     def __defineColourProgram(self, program):
         nInstruction = 0
         posIni = '1.0'
+        posEnd = ''
+        
+        iniProgram = self.__programs[program].getIniProgram()
+        endProgram = self.__programs[program].getEndProgram()
+        
+        if iniProgram != '':
+            posIni = self.__textEditor[program].search(iniProgram, posIni)
+        posEnd = self.__textEditor[program].search(endProgram, posIni)
         
         self.__textEditor[program].tag_config('instruction', foreground = 'blue')
         self.__textEditor[program].tag_config('text', foreground = 'black')
         self.__textEditor[program].tag_config('comment', foreground = 'grey')
+        self.__textEditor[program].tag_config('movements', foreground = 'dodger blue')
         
         instructions = self.__programs[program].getInstructions()
+        movements = self.__programs[program].getMovements()
         instruction = r'\y(?:{})\y'.format('|'.join(instructions))
         #instruction = '|'.join(instructions)
         countVar = StringVar()
         while True:
             instruction = instructions[nInstruction] + ' '
-            pos = self.__textEditor[program].search(instruction, posIni, count = countVar)
-            print(pos, instruction, countVar.get())
+            pos = self.__textEditor[program].search(instruction, index = posIni, stopindex = posEnd, count = countVar)
+            print(posIni, posEnd, instruction, endProgram)
             if not pos or pos == '' or self.__compareStr(pos, posIni):
                 nInstruction += 1
                 posIni = '1.0'
@@ -94,14 +104,13 @@ class Screen(Frame):
                 if nInstruction >= len(instructions):
                     break
             else:
-                posEnd = '{} + {}c'.format(pos, countVar.get())
-                self.__textEditor[program].tag_add('instruction', pos, posEnd)
+                posActual = '{} + {}c'.format(pos, countVar.get())
+                self.__textEditor[program].tag_add('instruction', pos, posActual)
                 #t = self.__textEditor[program].get(pos, posEnd)
                 #self.__textEditor[program].delete(pos, posEnd)
                 posIni = pos.split('.')
                 posIni = int(posIni[0]) + 1
                 posIni = str(posIni) + '.0'
-                print(pos, posIni, instruction)
                 
                 
     def __compareStr(self, str1, str2):
