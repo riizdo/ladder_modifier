@@ -85,7 +85,7 @@ class Screen(Frame):
         
         self.__textEditor[program].tag_config('instruction', foreground = 'blue')
         self.__textEditor[program].tag_config('text', foreground = 'black')
-        self.__textEditor[program].tag_config('comment', foreground = 'grey')
+        self.__textEditor[program].tag_config('comment', foreground = 'gray')
         self.__textEditor[program].tag_config('movements', foreground = 'dodger blue')
         
         instructions = self.__programs[program].getInstructions()
