@@ -23,7 +23,6 @@ class Screen(Frame):
         
         self.__languages = ('English', 'Spanish')
         self.__languageSelected = 'English'
-        self.__text = {}
         
         self.__createMenuBar()
         
@@ -72,7 +71,25 @@ class Screen(Frame):
     
     
     def __defineColourProgram(self, program):
-        nInstruction = 0
+        self.__textEditor[program].tag_config('instruction', foreground = 'blue')
+        self.__textEditor[program].tag_config('text', foreground = 'black')
+        self.__textEditor[program].tag_config('comment', foreground = 'gray')
+        self.__textEditor[program].tag_config('movements', foreground = 'dodger blue')
+        
+        instructions = self.__programs[program].getInstructions()
+        movements = self.__programs[program].getMovements()
+        #instruction = r'\y(?:{})\y'.format('|'.join(instructions))
+        #instruction = '|'.join(instructions)
+
+        self.__searchInProgram(program, instructions, 'instruction')
+        self.__searchInProgram(program, movements, 'movements')
+        
+           
+    def __searchInProgram(self, program, elements, tag):
+        if elements == None or elements == [] or elements == {}:
+            return
+        countVar = StringVar()
+        nElement = 0
         posIni = '1.0'
         posEnd = ''
         
@@ -82,44 +99,23 @@ class Screen(Frame):
         if iniProgram != '':
             posIni = self.__textEditor[program].search(iniProgram, posIni)
         posEnd = self.__textEditor[program].search(endProgram, posIni)
-        
-        self.__textEditor[program].tag_config('instruction', foreground = 'blue')
-        self.__textEditor[program].tag_config('text', foreground = 'black')
-        self.__textEditor[program].tag_config('comment', foreground = 'gray')
-        self.__textEditor[program].tag_config('movements', foreground = 'dodger blue')
-        
-        instructions = self.__programs[program].getInstructions()
-        movements = self.__programs[program].getMovements()
-        instruction = r'\y(?:{})\y'.format('|'.join(instructions))
-        #instruction = '|'.join(instructions)
-        countVar = StringVar()
+        posActual = posIni
         while True:
-            instruction = instructions[nInstruction] + ' '
-            pos = self.__textEditor[program].search(instruction, index = posIni, stopindex = posEnd, count = countVar)
-            print(posIni, posEnd, instruction, endProgram)
-            if not pos or pos == '' or self.__compareStr(pos, posIni):
-                nInstruction += 1
-                posIni = '1.0'
-                #break
-                if nInstruction >= len(instructions):
+            element = elements[nElement]
+            pos = self.__textEditor[program].search(element, index = posActual, stopindex = posEnd, count = countVar)
+            if not pos or pos == '':
+                nElement += 1
+                posActual = posIni
+                if nElement >= len(elements):
                     break
             else:
                 posActual = '{} + {}c'.format(pos, countVar.get())
-                self.__textEditor[program].tag_add('instruction', pos, posActual)
-                #t = self.__textEditor[program].get(pos, posEnd)
-                #self.__textEditor[program].delete(pos, posEnd)
-                posIni = pos.split('.')
-                posIni = int(posIni[0]) + 1
-                posIni = str(posIni) + '.0'
+                self.__textEditor[program].tag_add(tag, pos, posActual)
+                posActual = pos.split('.')
+                posActual = int(posActual[0]) + 1
+                posActual = str(posActual) + '.0'
                 
                 
-    def __compareStr(self, str1, str2):
-        num1 = float(str1)
-        num2 = float(str2)
-        
-        return num1 < num2
-                    
-    
     def __closeFile(self):
         self.__noteBook.forget(self.__noteBook.select())
         

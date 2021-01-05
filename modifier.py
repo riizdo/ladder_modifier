@@ -327,14 +327,16 @@ class Ladder(Program):
 class Job(Program):
     def __init__(self):
         Program.__init__(self)
-        self.instructions = ['IF', 'SET', 'GET', 'SETE', 'MUL', 'GETS', 'GETE', 'IFTHEN', 'ENDIF', 'REFP', 'DOUT', 'WAIT', 'PULSE']
+        self.instructions = ['IF', 'SET', 'GET', 'SETE', 'MUL', 'GETS',\
+                             'GETE', 'IFTHEN', 'ENDIF', 'REFP', 'DOUT',\
+                             'WAIT', 'PULSE', 'PAUSE', 'END', 'NOP', 'TIMER',\
+                             'DIN']
         self.movements = ['MOVJ', 'MOVL', 'MOVC', 'IMOV']
         self.iniProgram = 'NOP'
         self.endProgram = 'END'
         
         
     def readFile(self, file = None):
-        print(file)
         if file == None:
             if self.fileName == None or self.fileName == '':
                 return 'read file failed'
