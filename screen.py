@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, askdirectory
 import modifier
 import text
 
@@ -30,11 +30,18 @@ class Screen(Frame):
         self.__textEditor = {}
         self.__programs = {}
         
+        self.__treeView = ttk.Treeview(master)
+        self.__treeView.pack(anchor = NW)
+        
         self.__noteBook = ttk.Notebook(master)
         self.__noteBook.pack(anchor = NW)
             
         self.p = Button(self, text = 'hola', width = 10)
         self.p.pack()
+        
+        
+    def __loadProyect(self):
+        path = askdirectory()
     
     
     def __loadFile(self):
@@ -138,6 +145,8 @@ class Screen(Frame):
         self.__fileMenu = Menu(self.__menuBar, tearoff = 0)
         self.__menuBar.add_cascade(label = self.__texts.getText('File'), menu = self.__fileMenu)
         self.__indexMenuBar.append(self.__menuBar.index(self.__texts.getText('File')))
+        self.__fileMenu.add_command(label = self.__texts.getText('Select project'), command = self.__loadProyect)
+        self.__indexFileMenu.append(self.__fileMenu.index(self.__texts.getText('Select project')))
         self.__fileMenu.add_command(label = self.__texts.getText('Open'), command = self.__loadFile)
         self.__indexFileMenu.append(self.__fileMenu.index(self.__texts.getText('Open')))
         self.__fileMenu.add_command(label = self.__texts.getText('Close'), command = self.__closeFile)
@@ -187,11 +196,12 @@ class Screen(Frame):
         self.__menuBar.entryconfig(self.__indexMenuBar[1], label = self.__texts.getText('Edit'))
         self.__menuBar.entryconfig(self.__indexMenuBar[2], label = self.__texts.getText('Options'))
         
-        self.__fileMenu.entryconfig(self.__indexFileMenu[0], label = self.__texts.getText('Open'))
-        self.__fileMenu.entryconfig(self.__indexFileMenu[1], label = self.__texts.getText('Close'))
-        self.__fileMenu.entryconfig(self.__indexFileMenu[2], label = self.__texts.getText('Save'))
-        self.__fileMenu.entryconfig(self.__indexFileMenu[3], label = self.__texts.getText('Save as'))
-        self.__fileMenu.entryconfig(self.__indexFileMenu[4], label = self.__texts.getText('Exit'))
+        self.__fileMenu.entryconfig(self.__indexFileMenu[0], label = self.__texts.getText('Select project'))
+        self.__fileMenu.entryconfig(self.__indexFileMenu[1], label = self.__texts.getText('Open'))
+        self.__fileMenu.entryconfig(self.__indexFileMenu[2], label = self.__texts.getText('Close'))
+        self.__fileMenu.entryconfig(self.__indexFileMenu[3], label = self.__texts.getText('Save'))
+        self.__fileMenu.entryconfig(self.__indexFileMenu[4], label = self.__texts.getText('Save as'))
+        self.__fileMenu.entryconfig(self.__indexFileMenu[5], label = self.__texts.getText('Exit'))
         
         self.__optionMenu.entryconfig(self.__indexOptionMenu[0], label = self.__texts.getText('Language'))
         
