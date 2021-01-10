@@ -48,7 +48,6 @@ class Screen(Frame):
         partFile = partFile[len(partFile) - 1]
         extFile = partFile.split('.')
         extFile = extFile[len(extFile) - 1]
-        #print(extFile, partFile)
         
         if extFile == 'LST':
             self.__programs[partFile] = modifier.Ladder()
@@ -63,57 +62,51 @@ class Screen(Frame):
         self.master.title(self.__title + ' ' + file)
         self.__textEditor[partFile] = Text(self.__noteBook)
         self.__textEditor[partFile].insert('insert', self.__programs[partFile].getProgram())
-        self.__defineColourProgram(partFile)
+        self.__defineColour(partFile)
         self.__noteBook.add(self.__textEditor[partFile], text = self.__programs[partFile].file())
         self.__noteBook.select(self.__textEditor[partFile])
         
         return 'ok'
     
     
-    def __defineColourProgram(self, program):
+    def __defineColour(self, program):
         self.__textEditor[program].tag_config('instruction', foreground = 'blue')
         self.__textEditor[program].tag_config('text', foreground = 'black')
         self.__textEditor[program].tag_config('comment', foreground = 'gray')
-        self.__textEditor[program].tag_config('movements', foreground = 'dodger blue')
+        self.__textEditor[program].tag_config('movements', foreground = 'royal blue')
+            
+        comments = self.__programs[program].getPositionComments()
+        self.__appColour(program, comments, 'comment')
+        instructions = self.__programs[program].getPositionInstructions()
+        self.__appColour(program, instructions, 'instruction')
+        movements = self.__programs[program].getPositionMovements()
+        self.__appColour(program, movements, 'movements')
         
-        instructions = self.__programs[program].getInstructions()
-        movements = self.__programs[program].getMovements()
-        #instruction = r'\y(?:{})\y'.format('|'.join(instructions))
-        #instruction = '|'.join(instructions)
-
-        self.__searchInProgram(program, instructions, 'instruction')
-        self.__searchInProgram(program, movements, 'movements')
         
-           
-    def __searchInProgram(self, program, elements, tag):
-        if elements == None or elements == [] or elements == {}:
-            return
-        countVar = StringVar()
-        nElement = 0
-        posIni = '1.0'
-        posEnd = ''
+    def __appColour(self, program, elements, tag):
+        for element in elements:
+            self.__textEditor[program].tag_add(tag, element['ini'], element['end'])
+                
+                
+    def __comparePositions(self, pos1, pos2):
+        pos1 = pos1.split('.')
+        pos1 = int(pos1[0])
+        pos2 = pos2.split('.')
+        pos2 = int(pos2[0])
         
-        iniProgram = self.__programs[program].getIniProgram()
-        endProgram = self.__programs[program].getEndProgram()
-        
-        if iniProgram != '':
-            posIni = self.__textEditor[program].search(iniProgram, posIni)
-        posEnd = self.__textEditor[program].search(endProgram, posIni)
-        posActual = posIni
-        while True:
-            element = elements[nElement]
-            pos = self.__textEditor[program].search(element, index = posActual, stopindex = posEnd, count = countVar)
-            if not pos or pos == '':
-                nElement += 1
-                posActual = posIni
-                if nElement >= len(elements):
-                    break
-            else:
-                posActual = '{} + {}c'.format(pos, countVar.get())
-                self.__textEditor[program].tag_add(tag, pos, posActual)
-                posActual = pos.split('.')
-                posActual = int(posActual[0]) + 1
-                posActual = str(posActual) + '.0'
+        if pos1 == pos2:
+            return 0
+        elif pos1 > pos2:
+            return 1
+        elif pos1 < pos2:
+            return -1
+                
+                
+    def __nextRow(self, position):
+        position = position.split('.')
+        position = int(position[0]) + 1
+        position = str(position) + '.0'
+        return position
                 
                 
     def __closeFile(self):

@@ -11,8 +11,13 @@ class Program():
         self.consDirections = {}
         self.instructions = []
         self.movements = []
+        self.comments = ''
         self.iniProgram = ''
         self.endProgram = ''
+        self.positionComments = []
+        self.positionInstructions = []
+        self.positionMovements = []
+        self.positionVariables = []
     
     
     def file(self, file = None):
@@ -25,6 +30,108 @@ class Program():
         else:
             self.fileName = file
             
+            
+    def readFile(self, file):
+        ini = 0
+        counter = 1
+        outList = []
+        program = []
+        
+        try:
+            with open(file) as f:
+                self.simpleProgram = f.read()
+        except:
+            print('the file no exist or the path is incorrect')
+            return 'read file failed'    
+                
+        self.fileName = file
+        lines = self.simpleProgram.split('\n')
+        for line in lines:
+            comment = {}
+            instruction = {}
+            movement = {}
+            words = line.split(' ')
+            for word in words:
+                nWord = len(word)
+                position = self.isInstruction(word)
+                if position != None:
+                    instruction['ini'] = '{}.{}'.format(counter, ini)
+                    instruction['end'] = '{}.{} + {}c'.format(counter, ini, position)
+                    self.positionInstructions.append(instruction)
+                position = self.isMovement(word)
+                if position != None:
+                    movement['ini'] = '{}.{}'.format(counter, ini)
+                    movement['end'] = '{}.{} + {}c'.format(counter, ini, position)
+                    self.positionMovements.append(movement)
+                ini += nWord + 1
+            
+            position = self.isComment(line)
+            if position != None:
+                comment['ini'] = '{}.{}'.format(counter, position['ini'])
+                comment['end'] = '{}.{} + {}c'.format(counter, position['ini'], position['nChars'])
+                self.positionComments.append(comment)
+                
+            counter += 1
+            ini = 0
+        
+        #self.__formSegments(program, outList)
+        return 'ok'
+            
+            
+    def isComment(self, text):
+        position = {}
+        nText = len(text)
+        nChar = len(self.comments)
+        count = 0
+        word = ''
+        
+        for i in text:
+            for i in range(count, count + nChar):
+                word += text[i]
+            if word == self.comments:
+                position['ini'] = count
+                position['nChars'] = nText - count
+                #position = '{} + {}c'.format(count, nText - count)
+                return position
+            count += 1
+            word = ''
+            
+        return None
+    
+    
+    def isInstruction(self, text):
+        for instruction in self.instructions:
+            if text == instruction:
+                return len(text)
+        return None
+                        
+    
+    def isMovement(self, text):
+        for movement in self.movements:
+            if text == movement:
+                return len(text)
+        return None
+    
+    
+    def isVariable(self, text):
+        pass
+    
+    
+    def getPositionComments(self):
+        return self.positionComments
+    
+    
+    def getPositionInstructions(self):
+        return self.positionInstructions
+    
+    
+    def getPositionMovements(self):
+        return self.positionMovements
+    
+    
+    def getPositionVariables(self):
+        return self.positionVariables
+    
             
     def getTypeFile(self):
         partFile = self.fileName.split('.')
@@ -41,6 +148,14 @@ class Program():
     
     def getMovements(self):
         return self.movements
+    
+    
+    def getComments(self):
+        return self.comments
+    
+    
+    def getVariables(self):
+        return self.variables
     
     
     def getIniProgram(self):
@@ -63,7 +178,8 @@ class Ladder(Program):
         self.__program = []
         self.__segments = []
         self.__menus = ('CHANGE', 'CONSULT', 'EXIT')
-        self.instructions = ['STR', 'GSTR', 'OUT', 'GOUT', 'AND', 'OR', 'AND-NOT', 'OR-NOT', 'OR-STR', 'AND-STR', 'STR-NOT', 'PART']
+        self.instructions = ['STR', 'GSTR', 'OUT', 'GOUT', 'AND', 'OR', 'AND-NOT', 'OR-NOT', 'OR-STR', 'AND-STR', 'STR-NOT', 'PART', 'END']
+        self.comments = '/'
         self.iniProgram = ''
         self.endProgram = 'END'
         
@@ -260,18 +376,25 @@ class Ladder(Program):
     def exit(self):
         exit()
         
-        
+    '''    
     def readFile(self, file):
         counter = 0
         outList = []
         program = []
-        
+        print('readFile')
         try:
             with open(file) as f:
+                print('openFile', f)
                 self.simpleProgram = f.read()
                 self.fileName = file
-                for line in f:
+                lines = self.simpleProgram.split('\n')
+                for line in lines:
+                    print('line')
                     self.__program.append(line)
+                    comment = self.isComment(line)
+                    print('comment: ', comment)
+                    if comment != None:
+                        self.positionComments.append(comment)
                     treatLine = self.__comproveLine(line)
                     program.append(treatLine)
                     if treatLine[0] != None and (treatLine[0] == 'OUT' or treatLine[0] == 'GOUT' or treatLine[0] == 'PART'):
@@ -283,7 +406,7 @@ class Ladder(Program):
         
         self.__formSegments(program, outList)
         return 'ok'
-        
+    '''    
         
     def writeFile(self, file):
         counter = 0
@@ -332,28 +455,9 @@ class Job(Program):
                              'WAIT', 'PULSE', 'PAUSE', 'END', 'NOP', 'TIMER',\
                              'DIN']
         self.movements = ['MOVJ', 'MOVL', 'MOVC', 'IMOV']
+        self.comments = '/'
         self.iniProgram = 'NOP'
         self.endProgram = 'END'
-        
-        
-    def readFile(self, file = None):
-        if file == None:
-            if self.fileName == None or self.fileName == '':
-                return 'read file failed'
-            file = self.fileName
-        
-        try:
-            with open (file) as f:
-                self.simpleProgram = f.read()
-                self.fileName = file
-        except:
-            return 'read file failed'
-        return 'ok'
-        
-        
-    def writeFile(self, file = None):
-        if file == None:
-            file = self.fileName
             
             
         
