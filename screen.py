@@ -22,9 +22,6 @@ class Screen(Frame):
         
         self.master.title(self.__title + ' ' + self.__texts.getText('No project'))
         
-        self.__languages = ('English', 'Spanish')
-        self.__languageSelected = 'English'
-        
         self.__createMenuBar()
         
         self.__textEditor = {}

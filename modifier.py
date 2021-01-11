@@ -1,7 +1,7 @@
 #file: modifier.py
 #author: riizdo
 #date: 18/11/20
-#description: modifier for ladder program in motoman's robots
+#description: programs modifier for motoman robots
 
 
 class Program():
@@ -453,7 +453,7 @@ class Job(Program):
         self.instructions = ['IF', 'SET', 'GET', 'SETE', 'MUL', 'GETS',\
                              'GETE', 'IFTHEN', 'ENDIF', 'REFP', 'DOUT',\
                              'WAIT', 'PULSE', 'PAUSE', 'END', 'NOP', 'TIMER',\
-                             'DIN']
+                             'DIN', 'SUB', 'CLEAR']
         self.movements = ['MOVJ', 'MOVL', 'MOVC', 'IMOV']
         self.comments = '/'
         self.iniProgram = 'NOP'
@@ -461,6 +461,62 @@ class Job(Program):
             
             
         
+
+class Variable():
+    def __init__(self):
+        self.__originalList = ''
+        self.__variableB = {}
+        self.__variableI = {}
+        self.__variableD = {}
+        
+        self.__variableP = {}
+        self.__variableBP = {}
+        self.__variableEX = {}
+        
+        
+    def loadVariables(self, file):
+        active = ''
+        try:
+            with open(file) as f:
+                self.__originalList = f.read()
+        except:
+            error = 'error load {} file'.format(file)
+            print(error)
+            return error
+        
+        lines = self.__originalList.split('\n')
+        for line in lines:
+            if line != '\n' and line != None and active != '':
+                self.__readExistVariable(active, line)
+            if line == '///B':
+                active = 'B'
+            elif line == '///I':
+                active = 'I'
+            elif line == '///D':
+                active = 'D'
+            elif line == '///P':
+                active = 'P'
+            elif line == '///BP':
+                active = 'BP'
+            elif line == '///EX':
+                active = 'EX'
+                
+                
+    def __readExistVariable(typeVar, line):
+        variable = {}
+        partsLine = line.split(',')
+        number = partsLine[0].split(' ')
+        number = number[0]
+        
+        direction = typeVar + number
+        texts = partsLine[len(partsLine) - 1]
+        texts = texts.split('//')
+        comment = texts[0]
+        name = texts[1]
+            
+    
+    
+    
     
     
     
