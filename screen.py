@@ -1,3 +1,8 @@
+#file: modifier.py
+#author: riizdo
+#date: 20/12/20
+#description: screen class of the program
+
 from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename, askdirectory
@@ -76,7 +81,7 @@ class Screen(Frame):
         self.__openFile(file)
     
     
-    def __loadFile(self):
+    def __selectFile(self):
         error = ''
         file = askopenfilename(title = self.__texts.getText('Open'), filetypes=((self.__texts.getText('Ladder files'), '*.LST'),\
                                           (self.__texts.getText('Job files'), '*.JBI'),\
@@ -194,7 +199,7 @@ class Screen(Frame):
         self.__indexMenuBar.append(self.__menuBar.index(self.__texts.getText('File')))
         self.__fileMenu.add_command(label = self.__texts.getText('Select project'), command = self.__loadProyect)
         self.__indexFileMenu.append(self.__fileMenu.index(self.__texts.getText('Select project')))
-        self.__fileMenu.add_command(label = self.__texts.getText('Open'), command = self.__loadFile)
+        self.__fileMenu.add_command(label = self.__texts.getText('Open'), command = self.__selectFile)
         self.__indexFileMenu.append(self.__fileMenu.index(self.__texts.getText('Open')))
         self.__fileMenu.add_command(label = self.__texts.getText('Close'), command = self.__closeFile)
         self.__indexFileMenu.append(self.__fileMenu.index(self.__texts.getText('Close')))

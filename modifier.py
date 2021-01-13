@@ -1,7 +1,7 @@
 #file: modifier.py
 #author: riizdo
 #date: 18/11/20
-#description: programs modifier for motoman robots
+#description: program class of the program - for motoman robots
 
 
 class Program():
@@ -14,6 +14,7 @@ class Program():
         self.comments = ''
         self.iniProgram = ''
         self.endProgram = ''
+        self.extension = ''
         self.positionComments = []
         self.positionInstructions = []
         self.positionMovements = []
@@ -182,6 +183,7 @@ class Ladder(Program):
         self.comments = '/'
         self.iniProgram = ''
         self.endProgram = 'END'
+        self.extension = 'LST'
         
         
         self.consDirections['general input'] = ['input', 10, 2567]
@@ -458,6 +460,7 @@ class Job(Program):
         self.comments = '/'
         self.iniProgram = 'NOP'
         self.endProgram = 'END'
+        self.extension = 'JBI'
 
 
 
@@ -556,9 +559,50 @@ class VariableList():
         self.__variableList[direction].name(name)
         
         
+        
+        
+
+        
+class Project():
+    def __init__(self, project = None):
+        self.filesList = []
+        self.variablesList = VariableList()
+        self.jobsList = {}
+        self.ladder = ''
+        self.otherFilesList = []
+        if project == None:
+            self.path = ''
+            self.name = ''
+        else:
+            self.path = project
+            self.load(self.path)
+        
     
-            
+    def load(self, project):
+        self.name = self.__separateName(project)
+        content = os.listdir(self.path)
+        for file in content:
+            extension = self.__separateExtension(file)
+            self.filesList.append(file)
+            if extension == 'JBI':
+                self.jobsList[file] = Job()
+            elif extension == 'LST':
+                self.ladder = Ladder()
+            elif file == 'VARNAME.DAT':
+                self.variableList.loadVariables(self.path + '/' + file)
+        
+        
+    def __separateName(self, path):
+        name = path.split('/')
+        name = name[len(name) -1]
+        return name
     
+    
+    def __separateExtension(self, name):
+        name = self.__separateName(name)
+        extension = name.spli('.')
+        extension = extension[len(extension) - 1]
+        return extension
     
     
     
