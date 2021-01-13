@@ -453,18 +453,45 @@ class Job(Program):
         self.instructions = ['IF', 'SET', 'GET', 'SETE', 'MUL', 'GETS',\
                              'GETE', 'IFTHEN', 'ENDIF', 'REFP', 'DOUT',\
                              'WAIT', 'PULSE', 'PAUSE', 'END', 'NOP', 'TIMER',\
-                             'DIN', 'SUB', 'CLEAR']
-        self.movements = ['MOVJ', 'MOVL', 'MOVC', 'IMOV']
+                             'DIN', 'SUB', 'CLEAR', 'INC']
+        self.movements = ['MOVJ', 'MOVL', 'MOVC', 'IMOV', 'SFTON', 'SFTOF']
         self.comments = '/'
         self.iniProgram = 'NOP'
         self.endProgram = 'END'
+
+
+
+class Variables():
+    def __init__(self, direction, comment = None, name =  None):
+        self.__direction = direction
+        if comment != None:
+            self.__comment = comment
+        else:
+            self.__comment = ''
+        if name != None:
+            self.__name = name
+        else:
+            self.__name = ''
             
+            
+    def comment(self, comment = None):
+        if comment == None:
+            return self.__comment
+        self.__comment = comment
+        
+        
+    def name(self, name = None):
+        if name == None:
+            return self.__name
+        self.__name = name
+        
             
         
 
-class Variable():
+class VariableList():
     def __init__(self):
         self.__originalList = ''
+        self.__variableList = {}
         self.__variableB = {}
         self.__variableI = {}
         self.__variableD = {}
@@ -503,16 +530,33 @@ class Variable():
                 
                 
     def __readExistVariable(typeVar, line):
-        variable = {}
         partsLine = line.split(',')
         number = partsLine[0].split(' ')
         number = number[0]
-        
         direction = typeVar + number
         texts = partsLine[len(partsLine) - 1]
         texts = texts.split('//')
         comment = texts[0]
         name = texts[1]
+        
+        variable = Variable(direction, comment, name)
+        
+        self.__variableList[direction] = variable
+        
+        
+    def comment(self, direction, comment = None):
+        if comment == None:
+            return self.__variableList[direction].comment()
+        self.__variableList[direction].comment(comment)
+        
+        
+    def name(self, direction, name = None):
+        if name == None:
+            return self.__variableList[direction].name()
+        self.__variableList[direction].name(name)
+        
+        
+    
             
     
     
