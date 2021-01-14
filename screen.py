@@ -6,7 +6,6 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename, askdirectory
-import os
 import modifier
 import text
 
@@ -31,6 +30,7 @@ class Screen(Frame):
         
         self.__textEditor = {}
         self.__programs = {}
+        self.__projects = {}
         
         self.__treeView = ttk.Treeview(master, height = 30)
         self.__treeView.place(x = 5, y = 30)
@@ -43,41 +43,44 @@ class Screen(Frame):
         
         
     def __loadProyect(self):
-        self.__path = askdirectory()
+        path = askdirectory()
         
-        if self.__path == None or self.__path == ():
+        if path == None or path == ():
             return 'no project select'
         
-        project = self.__path.split('/')
-        project = project[len(project) - 1]
+        project = modifier.Project(path)
+        self.__projects[project.getName()] = project
         
-        self.master.title(self.__title + ' ' + project)
-        self.__treeView.heading('#0', text = project)
+        self.master.title(self.__title + ' ' + project.getName())
+        self.__treeView.heading('#0', text = project.getName())
         self.__treeView.tag_configure('default', font = ('arial', 8))
         self.__treeView.tag_configure('project', font = ('arial', 10))
         self.__treeView.tag_configure('types', font = ('arial', 10))
         self.__treeView.bind('<Double-1>', self.__doubleClickTreeView)
         
-        projectContent = os.listdir(self.__path)
-        
-        item = self.__treeView.insert('', 'end', text = project, tag = 'project')
+        item = self.__treeView.insert('', 'end', text = project.getName(), tag = 'project')
         job = self.__treeView.insert(item, 'end', text = self.__texts.getText('Jobs'), tag = 'types')
         ladder = self.__treeView.insert(item, 'end', text = self.__texts.getText('Ladder'), tag = 'types')
         other = self.__treeView.insert(item, 'end', text = self.__texts.getText('Others'), tag = 'types')
+        
+        projectContent = project.getJobsList()
         for element in projectContent:
-            ext = self.__extensionFile(element)
-            if ext == 'JBI':
-                self.__treeView.insert(job, 'end', text = element, tag = 'default')
-            elif ext == 'LST':
-                self.__treeView.insert(ladder, 'end', text = element, tag = 'default')
-            else:
-                self.__treeView.insert(other, 'end', text = element, tag = 'default')
+            self.__treeView.insert(job, 'end', text = element, tag = 'default')
+        projectContent = project.getLadder()
+        self.__treeView.insert(ladder, 'end', text = projectContent, tag = 'default')
+        projectContent = project.getOtherFilesList()
+        for element in projectContent:
+            self.__treeView.insert(other, 'end', text = element, tag = 'default')
                 
                 
     def __doubleClickTreeView(self, event):
+        path = ''
         file = self.__treeView.selection()
         file = self.__treeView.item(file)['text']
-        file = self.__path + '/' + file
+        for project in self.__projects:
+            if self.__projects[project].existsFile(file):
+                path = self.__projects[project].getPath()
+        file = path + '/' + file
         self.__openFile(file)
     
     
@@ -176,6 +179,8 @@ class Screen(Frame):
         
     def __saveFile(self):
         program = self.__noteBook.select()
+        elements = self.__noteBook.tab(program)
+        program = elements['text']
         file = self.__programs[program].file()
         self.__programs[program].writeFile(file)
     

@@ -3,6 +3,8 @@
 #date: 18/11/20
 #description: program class of the program - for motoman robots
 
+import os
+
 
 class Program():
     def __init__(self):
@@ -77,6 +79,10 @@ class Program():
         
         #self.__formSegments(program, outList)
         return 'ok'
+    
+    
+    def writeFile(self, file = None):
+        pass
             
             
     def isComment(self, text):
@@ -464,7 +470,7 @@ class Job(Program):
 
 
 
-class Variables():
+class Variable():
     def __init__(self, direction, comment = None, name =  None):
         self.__direction = direction
         if comment != None:
@@ -532,7 +538,7 @@ class VariableList():
                 active = 'EX'
                 
                 
-    def __readExistVariable(typeVar, line):
+    def __readExistVariable(self, typeVar, line):
         partsLine = line.split(',')
         number = partsLine[0].split(' ')
         number = number[0]
@@ -540,9 +546,11 @@ class VariableList():
         texts = partsLine[len(partsLine) - 1]
         texts = texts.split('//')
         comment = texts[0]
-        name = texts[1]
-        
-        variable = Variable(direction, comment, name)
+        if len(texts) > 1:
+            name = texts[1]
+            variable = Variable(direction, comment, name)
+        else:
+            variable = Variable(direction, comment)
         
         self.__variableList[direction] = variable
         
@@ -589,7 +597,10 @@ class Project():
             elif extension == 'LST':
                 self.ladder = Ladder()
             elif file == 'VARNAME.DAT':
-                self.variableList.loadVariables(self.path + '/' + file)
+                self.variablesList.loadVariables(self.path + '/' + file)
+                self.otherFilesList.append(file)
+            else:
+                self.otherFilesList.append(file)
         
         
     def __separateName(self, path):
@@ -600,10 +611,36 @@ class Project():
     
     def __separateExtension(self, name):
         name = self.__separateName(name)
-        extension = name.spli('.')
+        extension = name.split('.')
         extension = extension[len(extension) - 1]
         return extension
     
+    
+    def getName(self):
+        return self.name
+    
+    
+    def getPath(self):
+        return self.path
+    
+    
+    def getJobsList(self):
+        return self.jobsList
+    
+    
+    def getLadder(self):
+        return self.ladder
+    
+    
+    def getOtherFilesList(self):
+        return self.otherFilesList
+    
+    
+    def existsFile(self, file):
+        for f in self.filesList:
+            if f == file:
+                return True
+        return False
     
     
     
