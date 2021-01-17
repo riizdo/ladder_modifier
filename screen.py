@@ -16,21 +16,25 @@ class Screen(Frame):
         self.__title = 'Ladder Modifier -'
         self.pack()
         self.master.geometry('1200x600+0+0')
+        self.master.resizable(True, True)
         #self.__fontInstruction = Font('arial')
         
         self.__indexMenuBar = []
         self.__indexFileMenu = []
+        self.__indexViewMenu = []
         self.__indexOptionMenu = []
         self.__indexLanguageMenu = []
+        self.__optionDirection = StringVar()
+        self.__optionName = StringVar()
+        self.__optionComment = StringVar()
         self.__texts = text.TextLibrary()
+        self.__textEditor = {}
+        self.__programs = {}
+        self.__project = ''
         
         self.master.title(self.__title + ' ' + self.__texts.getText('No project'))
         
         self.__createMenuBar()
-        
-        self.__textEditor = {}
-        self.__programs = {}
-        self.__projects = {}
         
         self.__treeView = ttk.Treeview(master, height = 30)
         self.__treeView.place(x = 5, y = 30)
@@ -48,27 +52,26 @@ class Screen(Frame):
         if path == None or path == ():
             return 'no project select'
         
-        project = modifier.Project(path)
-        self.__projects[project.getName()] = project
+        self.__project = modifier.Project(path)
         
-        self.master.title(self.__title + ' ' + project.getName())
-        self.__treeView.heading('#0', text = project.getName())
+        self.master.title(self.__title + ' ' + self.__project.getName())
+        self.__treeView.heading('#0', text = self.__project.getName())
         self.__treeView.tag_configure('default', font = ('arial', 8))
         self.__treeView.tag_configure('project', font = ('arial', 10))
         self.__treeView.tag_configure('types', font = ('arial', 10))
         self.__treeView.bind('<Double-1>', self.__doubleClickTreeView)
         
-        item = self.__treeView.insert('', 'end', text = project.getName(), tag = 'project')
+        item = self.__treeView.insert('', 'end', text = self.__project.getName(), tag = 'project')
         job = self.__treeView.insert(item, 'end', text = self.__texts.getText('Jobs'), tag = 'types')
         ladder = self.__treeView.insert(item, 'end', text = self.__texts.getText('Ladder'), tag = 'types')
         other = self.__treeView.insert(item, 'end', text = self.__texts.getText('Others'), tag = 'types')
         
-        projectContent = project.getJobsList()
+        projectContent = self.__project.getJobsList()
         for element in projectContent:
             self.__treeView.insert(job, 'end', text = element, tag = 'default')
-        projectContent = project.getLadder()
+        projectContent = self.__project.getLadder()
         self.__treeView.insert(ladder, 'end', text = projectContent, tag = 'default')
-        projectContent = project.getOtherFilesList()
+        projectContent = self.__project.getOtherFilesList()
         for element in projectContent:
             self.__treeView.insert(other, 'end', text = element, tag = 'default')
                 
@@ -77,10 +80,10 @@ class Screen(Frame):
         path = ''
         file = self.__treeView.selection()
         file = self.__treeView.item(file)['text']
-        for project in self.__projects:
-            if self.__projects[project].existsFile(file):
-                path = self.__projects[project].getPath()
-        file = path + '/' + file
+        '''
+        if self.__project.existsFile(file):
+            path = self.__project.getPath()
+        file = path + '/' + file'''
         self.__openFile(file)
     
     
@@ -92,47 +95,32 @@ class Screen(Frame):
         if file == None or file == ():
             return 'no file select'
         self.__openFile(file)
-        
-        
+
+
     def __openFile(self, file):
-        partFile = file.split('/')
-        partFile = partFile[len(partFile) - 1]
-        extFile = partFile.split('.')
-        extFile = extFile[len(extFile) - 1]
-        extFile = self.__extensionFile(partFile)
-        
-        if extFile == 'LST':
-            self.__programs[partFile] = modifier.Ladder()
-            error = self.__programs[partFile].readFile(file)
-        elif extFile == 'JBI':
-            self.__programs[partFile] = modifier.Job()
-            error = self.__programs[partFile].readFile(file)
-        if error != 'ok':
-            print(error)
-            return error
-        
         self.master.title(self.__title + ' ' + file)
-        self.__textEditor[partFile] = Text(self.__noteBook)
-        self.__textEditor[partFile].insert('insert', self.__programs[partFile].getProgram())
-        self.__defineColour(partFile)
-        self.__noteBook.add(self.__textEditor[partFile], text = self.__programs[partFile].file())
-        self.__noteBook.select(self.__textEditor[partFile])
+        self.__textEditor[file] = Text(self.__noteBook)
+        print('openning file in screen: ', self.__project.getProgram(file, False, False, False))
+        self.__textEditor[file].insert('insert', self.__project.getProgram(file, False, False, False))
+        self.__defineColour(file)
+        self.__noteBook.add(self.__textEditor[file], text = file)
+        self.__noteBook.select(self.__textEditor[file])
         
-        return 'ok'
+        return 'textEditor open file'
     
     
-    def __defineColour(self, program):
-        self.__textEditor[program].tag_config('instruction', foreground = 'blue')
-        self.__textEditor[program].tag_config('text', foreground = 'black')
-        self.__textEditor[program].tag_config('comment', foreground = 'gray')
-        self.__textEditor[program].tag_config('movements', foreground = 'royal blue')
-            
-        comments = self.__programs[program].getPositionComments()
-        self.__appColour(program, comments, 'comment')
-        instructions = self.__programs[program].getPositionInstructions()
-        self.__appColour(program, instructions, 'instruction')
-        movements = self.__programs[program].getPositionMovements()
-        self.__appColour(program, movements, 'movements')
+    def __defineColour(self, file):
+        self.__textEditor[file].tag_config('instruction', foreground = 'blue')
+        self.__textEditor[file].tag_config('text', foreground = 'black')
+        self.__textEditor[file].tag_config('comment', foreground = 'gray')
+        self.__textEditor[file].tag_config('movements', foreground = 'royal blue')
+
+        instructions = self.__project.getPositionInstructions(file)
+        self.__appColour(file, instructions, 'instruction')
+        movements = self.__project.getPositionMovements(file)
+        self.__appColour(file, movements, 'movements')
+        comments = self.__project.getPositionComments(file)
+        self.__appColour(file, comments, 'comment')
         
         
     def __appColour(self, program, elements, tag):
@@ -220,6 +208,19 @@ class Screen(Frame):
         self.__menuBar.add_cascade(label = self.__texts.getText('Edit'), menu = self.__editMenu)
         self.__indexMenuBar.append(self.__menuBar.index('Edit'))
         
+        self.__viewMenu = Menu(self.__menuBar, tearoff = 0)
+        self.__menuBar.add_cascade(label = self.__texts.getText('View'), menu = self.__viewMenu)
+        self.__indexMenuBar.append(self.__menuBar.index('View'))
+        self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable directions'), variable = self.__optionDirection,\
+                                        onvalue = True, offvalue = False)
+        self.__indexViewMenu.append(self.__viewMenu.index(self.__texts.getText('Variable directions')))
+        self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable names'), variable = self.__optionName,\
+                                        onvalue = True, offvalue = False)
+        self.__indexViewMenu.append(self.__viewMenu.index(self.__texts.getText('Variable names')))
+        self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable comments'), variable = self.__optionComment,\
+                                        onvalue = True, offvalue = False)
+        self.__indexViewMenu.append(self.__viewMenu.index(self.__texts.getText('Variable comments')))
+
         self.__optionMenu = Menu(self.__menuBar, tearoff = 0)
         self.__menuBar.add_cascade(label = self.__texts.getText('Options'), menu = self.__optionMenu)
         self.__indexMenuBar.append(self.__menuBar.index('Options'))
@@ -251,7 +252,8 @@ class Screen(Frame):
         
         self.__menuBar.entryconfig(self.__indexMenuBar[0], label = self.__texts.getText('File'))
         self.__menuBar.entryconfig(self.__indexMenuBar[1], label = self.__texts.getText('Edit'))
-        self.__menuBar.entryconfig(self.__indexMenuBar[2], label = self.__texts.getText('Options'))
+        self.__menuBar.entryconfig(self.__indexMenuBar[2], label = self.__texts.getText('View'))
+        self.__menuBar.entryconfig(self.__indexMenuBar[3], label = self.__texts.getText('Options'))
         
         self.__fileMenu.entryconfig(self.__indexFileMenu[0], label = self.__texts.getText('Select project'))
         self.__fileMenu.entryconfig(self.__indexFileMenu[1], label = self.__texts.getText('Open'))
@@ -259,6 +261,10 @@ class Screen(Frame):
         self.__fileMenu.entryconfig(self.__indexFileMenu[3], label = self.__texts.getText('Save'))
         self.__fileMenu.entryconfig(self.__indexFileMenu[4], label = self.__texts.getText('Save as'))
         self.__fileMenu.entryconfig(self.__indexFileMenu[5], label = self.__texts.getText('Exit'))
+        
+        self.__viewMenu.entryconfig(self.__indexViewMenu[0], label = self.__texts.getText('Variable directions'))
+        self.__viewMenu.entryconfig(self.__indexViewMenu[1], label = self.__texts.getText('Variable names'))
+        self.__viewMenu.entryconfig(self.__indexViewMenu[2], label = self.__texts.getText('Variable commets'))
         
         self.__optionMenu.entryconfig(self.__indexOptionMenu[0], label = self.__texts.getText('Language'))
         

@@ -7,12 +7,21 @@ import os
 
 
 class Program():
-    def __init__(self):
-        self.fileName = ''
+    def __init__(self, file = None):
+        if file == None:
+            self.path  =''
+            self.fileName = ''
+        else:
+            partsFile = self.__separateName(file)
+            self.fileName = partsFile['name']
+            self.path = partsFile['path']
         self.simpleProgram = ''
+        self.editProgram = ''
         self.consDirections = {}
         self.instructions = []
         self.movements = []
+        self.variables = []
+        self.variablesList = VariableList()
         self.comments = ''
         self.iniProgram = ''
         self.endProgram = ''
@@ -23,36 +32,34 @@ class Program():
         self.positionVariables = []
     
     
-    def file(self, file = None):
-        if file == None:
-            if self.fileName == None or self.fileName == '':
-                return None
-            partsFile = self.fileName.split('/')
-            latest = len(partsFile) -1
-            return partsFile[latest]
-        else:
-            self.fileName = file
+    def getFileName(self):
+        return self.fileName
+        
             
             
     def readFile(self, file):
-        ini = 0
-        counter = 1
-        outList = []
-        program = []
-        
         try:
             with open(file) as f:
                 self.simpleProgram = f.read()
         except:
             print('the file no exist or the path is incorrect')
-            return 'read file failed'    
+            return 'read file failed'
+        return 'read file ok'
                 
-        self.fileName = file
+        
+    def __formEditProgram(self, direction, name, comment):
+        ini = 0
+        counter = 1
+        outList = []
+        program = []
+        
         lines = self.simpleProgram.split('\n')
+        self.editProgram = self.simpleProgram
         for line in lines:
             comment = {}
             instruction = {}
             movement = {}
+            variable = {}
             words = line.split(' ')
             for word in words:
                 nWord = len(word)
@@ -67,6 +74,11 @@ class Program():
                     movement['end'] = '{}.{} + {}c'.format(counter, ini, position)
                     self.positionMovements.append(movement)
                 ini += nWord + 1
+                position = self.isVariable(word)
+                if position != None:
+                    variable['ini'] = '{}.{}'.format(counter, ini)
+                    variable['end'] = '{}.{} + {}c'.format(counter, ini, position)
+                    self.positionVariables.append(variable)
             
             position = self.isComment(line)
             if position != None:
@@ -121,8 +133,27 @@ class Program():
     
     
     def isVariable(self, text):
-        pass
+        for variable in self.variables:
+            if text == variable:
+                return len(text)
+        return None
     
+    
+    def __separateName(self, file):
+        dic = {}
+        path = ''
+        partsFile = file.split('/')
+        name = partsFile[len(partsFile) - 1]
+        for part in partsFile:
+            if path != '':
+                path += '/'
+            if part == name:
+                break
+            path += part
+        dic['path'] = path
+        dic['name'] = name
+        return dic
+        
     
     def getPositionComments(self):
         return self.positionComments
@@ -145,8 +176,9 @@ class Program():
         return partFile[len(partFile) - 1]
     
     
-    def getProgram(self):
-        return self.simpleProgram
+    def getProgram(self, direction, name, comment):
+        self.__formEditProgram(direction, name, comment)
+        return self.editProgram
     
     
     def getInstructions(self):
@@ -171,18 +203,33 @@ class Program():
     
     def getEndProgram(self):
         return self.endProgram
+    
+    
+    def idElement(self, idElement = None):
+        if idElement == None:
+            return self.idElement
+        self.idElement = idElement
+        
+        
+    def path(self, path = None):
+        if path == None:
+            return self.path
+        self.path = path
+        
+        
+    def name(self, name = None):
+        if name == None:
+            return self.fileName
+        self.filename = name
+        
             
             
             
             
         
 class Ladder(Program):
-    def __init__(self):
-        Program.__init__(self)
-        self.__version = 0
-        self.__header = 'is a program to simplify the modification of the motoman ladder, version: {}.'.format(self.__version)
-        self.__path = ''
-        self.__program = []
+    def __init__(self, file = None):
+        Program.__init__(self, file)
         self.__segments = []
         self.__menus = ('CHANGE', 'CONSULT', 'EXIT')
         self.instructions = ['STR', 'GSTR', 'OUT', 'GOUT', 'AND', 'OR', 'AND-NOT', 'OR-NOT', 'OR-STR', 'AND-STR', 'STR-NOT', 'PART', 'END']
@@ -208,10 +255,6 @@ class Ladder(Program):
         #self.consDirections['analog input registrer'] = ['input', 'm600', 'm639']
         #self.consDirections['analog output registrer'] = ['output', 'm560', 'm599']
         #self.consDirections['system registrer'] = ['', 'm640', 'm999']
-        
-        
-    def __str__(self):
-        return self.__header
     
 
     def __searchDirection(self, direction):
@@ -445,9 +488,6 @@ class Ladder(Program):
         return self.__menus
     
     
-    
-    
-    
     def getSegments(self):
         return self.__segments
     
@@ -456,8 +496,8 @@ class Ladder(Program):
     
     
 class Job(Program):
-    def __init__(self):
-        Program.__init__(self)
+    def __init__(self, file = None):
+        Program.__init__(self, file)
         self.instructions = ['IF', 'SET', 'GET', 'SETE', 'MUL', 'GETS',\
                              'GETE', 'IFTHEN', 'ENDIF', 'REFP', 'DOUT',\
                              'WAIT', 'PULSE', 'PAUSE', 'END', 'NOP', 'TIMER',\
@@ -493,6 +533,12 @@ class Variable():
         if name == None:
             return self.__name
         self.__name = name
+        
+        
+    def direction(self, direction = None):
+        if direction == None:
+            return self.__direction
+        self.__direction = direction
         
             
         
@@ -555,6 +601,10 @@ class VariableList():
         self.__variableList[direction] = variable
         
         
+    def addVariable(self, direction):
+        self.__variableList[direction] = Variable(direction)
+        
+        
     def comment(self, direction, comment = None):
         if comment == None:
             return self.__variableList[direction].comment()
@@ -572,9 +622,13 @@ class VariableList():
 
         
 class Project():
-    def __init__(self, project = None):
+    def __init__(self, project = None, idElement = None):
+        if idElement == None:
+            self.idElement = None
+        else:
+            self.idElement = idElement
         self.filesList = []
-        self.variablesList = VariableList()
+        self.variableList = VariableList()
         self.jobsList = {}
         self.ladder = ''
         self.otherFilesList = []
@@ -587,20 +641,27 @@ class Project():
         
     
     def load(self, project):
+        if project == None and self.path == '':
+            return 'no path in project'
         self.name = self.__separateName(project)
         content = os.listdir(self.path)
         for file in content:
+            f = self.path + '/' + file
             extension = self.__separateExtension(file)
             self.filesList.append(file)
             if extension == 'JBI':
-                self.jobsList[file] = Job()
+                self.jobsList[file] = Job(f)
+                self.jobsList[file].readFile(f)
             elif extension == 'LST':
-                self.ladder = Ladder()
+                self.ladder = Ladder(f)
+                self.ladder.readFile(f)
             elif file == 'VARNAME.DAT':
-                self.variablesList.loadVariables(self.path + '/' + file)
+                self.variableList.loadVariables(self.path + '/' + file)
                 self.otherFilesList.append(file)
             else:
                 self.otherFilesList.append(file)
+                
+        return 'project loaded'
         
         
     def __separateName(self, path):
@@ -616,6 +677,12 @@ class Project():
         return extension
     
     
+    def idElement(self, idElement = None):
+        if idElement == None:
+            return self.idElement
+        self.idElement = idElement
+    
+    
     def getName(self):
         return self.name
     
@@ -629,7 +696,8 @@ class Project():
     
     
     def getLadder(self):
-        return self.ladder
+        name = self.ladder.name()
+        return name
     
     
     def getOtherFilesList(self):
@@ -642,6 +710,49 @@ class Project():
                 return True
         return False
     
+    
+    def getVariableList(self):
+        return self.variableList
+    
+    
+    def getProgram(self, file, direction, name, comment):
+        extension = self.__separateExtension(file)
+        if extension == 'JBI':
+            return self.jobsList[file].getProgram(direction, name, comment)
+        elif extension == 'LST':
+            return self.ladder.getProgram(direction, name, comment)
+
+    
+    def getPositionComments(self, file):
+        extension = self.__separateExtension(file)
+        if extension == 'JBI':
+            return self.jobsList[file].getPositionComments()
+        elif extension == 'LST':
+            return self.ladder.getPositionComments()
+        
+        
+    def getPositionInstructions(self, file):
+        extension = self.__separateExtension(file)
+        if extension == 'JBI':
+            return self.jobsList[file].getPositionInstructions()
+        elif extension == 'LST':
+            return self.ladder.getPositionInstructions()
+        
+        
+    def getPositionMovements(self, file):
+        extension = self.__separateExtension(file)
+        if extension == 'JBI':
+            return self.jobsList[file].getPositionMovements()
+        elif extension == 'LST':
+            return self.ladder.getPositionMovements()
+        
+        
+    def getPositionVariables(self, file):
+        extension = self.__separateExtension(file)
+        if extension == 'JBI':
+            return self.jobsList[file].getPositionVariables()
+        elif extension == 'LST':
+            return self.ladder.getPositionVariables()
     
     
     

@@ -57,5 +57,8 @@ class TextLibrary():
         self.__texts['Jobs'] = {self.__languages[0]: 'Jobs', self.__languages[1]: 'Programas'}
         self.__texts['Ladder'] = {self.__languages[0]: 'Ladder', self.__languages[1]: 'Ladder'}
         self.__texts['Others'] = {self.__languages[0]: 'Others', self.__languages[1]: 'Otros'}
-        
+        self.__texts['View'] = {self.__languages[0]: 'View', self.__languages[1]: 'Ver'}
+        self.__texts['Variable directions'] = {self.__languages[0]: 'Variable directions', self.__languages[1]: 'Direccion variables'}
+        self.__texts['Variable names'] = {self.__languages[0]: 'Variable names', self.__languages[1]: 'Nombre variables'}
+        self.__texts['Variable comments'] = {self.__languages[0]: 'Variable comments', self.__languages[1]: 'Comentarios variables'}
         
