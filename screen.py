@@ -29,7 +29,6 @@ class Screen(Frame):
         self.__optionComment = StringVar()
         self.__texts = text.TextLibrary()
         self.__textEditor = {}
-        self.__programs = {}
         self.__project = ''
         
         self.master.title(self.__title + ' ' + self.__texts.getText('No project'))
@@ -114,11 +113,15 @@ class Screen(Frame):
         self.__textEditor[file].tag_config('text', foreground = 'black')
         self.__textEditor[file].tag_config('comment', foreground = 'gray')
         self.__textEditor[file].tag_config('movements', foreground = 'royal blue')
+        self.__textEditor[file].tag_config('variables', foreground = 'sea green')
+        self.__textEditor[file].tag_config('simbols', foreground = 'dark slate blue')
 
         instructions = self.__project.getPositionInstructions(file)
         self.__appColour(file, instructions, 'instruction')
         movements = self.__project.getPositionMovements(file)
         self.__appColour(file, movements, 'movements')
+        variables = self.__project.getPositionVariables(file)
+        self.__appColour(file, variables, 'variables')
         comments = self.__project.getPositionComments(file)
         self.__appColour(file, comments, 'comment')
         
@@ -166,17 +169,11 @@ class Screen(Frame):
         
         
     def __saveFile(self):
-        program = self.__noteBook.select()
-        elements = self.__noteBook.tab(program)
-        program = elements['text']
-        file = self.__programs[program].file()
-        self.__programs[program].writeFile(file)
+        pass
     
     
     def __saveAs(self):
-        file = asksaveasfilename()
-        program = self.__noteBook.select()
-        self.__programs[program].writeFile(file)
+        pass
     
     
     def __exit(self):
@@ -246,7 +243,7 @@ class Screen(Frame):
         
         
     def __chargeTexts(self):
-        if self.__programs == {}:
+        if self.__project == '':
             self.master.title(self.__title + ' ' + self.__texts.getText('No project'))
         #text = self.__texts.getText()
         
@@ -264,7 +261,7 @@ class Screen(Frame):
         
         self.__viewMenu.entryconfig(self.__indexViewMenu[0], label = self.__texts.getText('Variable directions'))
         self.__viewMenu.entryconfig(self.__indexViewMenu[1], label = self.__texts.getText('Variable names'))
-        self.__viewMenu.entryconfig(self.__indexViewMenu[2], label = self.__texts.getText('Variable commets'))
+        self.__viewMenu.entryconfig(self.__indexViewMenu[2], label = self.__texts.getText('Variable comments'))
         
         self.__optionMenu.entryconfig(self.__indexOptionMenu[0], label = self.__texts.getText('Language'))
         

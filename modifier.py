@@ -21,15 +21,18 @@ class Program():
         self.instructions = []
         self.movements = []
         self.variables = []
+        self.simbols = []
         self.variablesList = VariableList()
         self.comments = ''
         self.iniProgram = ''
         self.endProgram = ''
         self.extension = ''
+        self.positions = []
         self.positionComments = []
         self.positionInstructions = []
         self.positionMovements = []
         self.positionVariables = []
+        self.positionSimbols = []
     
     
     def getFileName(self):
@@ -73,12 +76,12 @@ class Program():
                     movement['ini'] = '{}.{}'.format(counter, ini)
                     movement['end'] = '{}.{} + {}c'.format(counter, ini, position)
                     self.positionMovements.append(movement)
-                ini += nWord + 1
                 position = self.isVariable(word)
                 if position != None:
                     variable['ini'] = '{}.{}'.format(counter, ini)
                     variable['end'] = '{}.{} + {}c'.format(counter, ini, position)
                     self.positionVariables.append(variable)
+                ini += nWord + 1
             
             position = self.isComment(line)
             if position != None:
@@ -89,12 +92,40 @@ class Program():
             counter += 1
             ini = 0
         
-        #self.__formSegments(program, outList)
         return 'ok'
     
     
     def writeFile(self, file = None):
         pass
+    
+    
+    def searchPositionLine(self, line, nLine):
+        positions = []
+        position = self.isComment(line)
+        if position != None:
+            comment = {}
+            comment['ini'] = '{}.{}'.format(nLine, position['ini'])
+            comment['end'] = '{}.{} + {}c'.format(nLine, position['ini'], position['nChars'])
+            comment['type'] = 'comment'
+            positions.append(comment)
+        words = line.split(' ')
+        for word in words:
+            position = self.searchPositionWord(word)
+            if position != None:
+                pass
+    
+    
+    def searchPositionWord(self, word):
+        position = {}
+        posInstruction = self.isInstruction(word)
+        if posInstruction == None:
+            posMovement = self.isMovement(word)
+        if posMovement == None:
+            posVariable = self.isVariable(word)
+        if posVariable == None:
+            posSimbol = self.isSimbol(word)
+        if posSimbol == None:
+            pass
             
             
     def isComment(self, text):
@@ -134,9 +165,24 @@ class Program():
     
     def isVariable(self, text):
         for variable in self.variables:
-            if text == variable:
+            if len(text) == len(variable):
+                for t, v in zip(text, variable):
+                    if t != v and v != '*':
+                        return None
                 return len(text)
-        return None
+            else:
+                return None
+    
+    
+    def isSimbol(self, text):
+        nSimbol = 0
+        for simbol in self.simbols:
+            result = text.split(simbol)
+            if len(result) <= 1:
+                return None
+            nSimbol = len(simbol)
+            for item in result:
+                pass
     
     
     def __separateName(self, file):
@@ -169,6 +215,10 @@ class Program():
     
     def getPositionVariables(self):
         return self.positionVariables
+    
+    
+    def getPositionSimbols(self):
+        return self.positionSimbols
     
             
     def getTypeFile(self):
@@ -233,6 +283,7 @@ class Ladder(Program):
         self.__segments = []
         self.__menus = ('CHANGE', 'CONSULT', 'EXIT')
         self.instructions = ['STR', 'GSTR', 'OUT', 'GOUT', 'AND', 'OR', 'AND-NOT', 'OR-NOT', 'OR-STR', 'AND-STR', 'STR-NOT', 'PART', 'END']
+        self.variables = ['#*****']
         self.comments = '/'
         self.iniProgram = ''
         self.endProgram = 'END'
@@ -504,6 +555,8 @@ class Job(Program):
                              'DIN', 'SUB', 'CLEAR', 'INC']
         self.movements = ['MOVJ', 'MOVL', 'MOVC', 'IMOV', 'SFTON', 'SFTOF']
         self.comments = '/'
+        self.variables = ['B***', 'I***', 'D***', 'R***', 'P***']
+        self.simbols = ['=', '<=', '>=', '+', '-']
         self.iniProgram = 'NOP'
         self.endProgram = 'END'
         self.extension = 'JBI'
@@ -753,6 +806,14 @@ class Project():
             return self.jobsList[file].getPositionVariables()
         elif extension == 'LST':
             return self.ladder.getPositionVariables()
+        
+        
+    def getPositionSimbols(self, file):
+        extension = self.__separateExtension(file)
+        if extension == 'JBI':
+            return self.jobsList[file].getPositionSimbols()
+        elif extension == 'LST':
+            return self.ladder.getPositionSimbols()
     
     
     
