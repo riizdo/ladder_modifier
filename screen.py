@@ -112,18 +112,20 @@ class Screen(Frame):
         self.__textEditor[file].tag_config('instruction', foreground = 'blue')
         self.__textEditor[file].tag_config('text', foreground = 'black')
         self.__textEditor[file].tag_config('comment', foreground = 'gray')
-        self.__textEditor[file].tag_config('movements', foreground = 'royal blue')
-        self.__textEditor[file].tag_config('variables', foreground = 'sea green')
-        self.__textEditor[file].tag_config('simbols', foreground = 'dark slate blue')
+        self.__textEditor[file].tag_config('movement', foreground = 'royal blue')
+        self.__textEditor[file].tag_config('variable', foreground = 'sea green')
+        self.__textEditor[file].tag_config('simbol', foreground = 'dark slate blue')
 
         instructions = self.__project.getPositionInstructions(file)
         self.__appColour(file, instructions, 'instruction')
         movements = self.__project.getPositionMovements(file)
-        self.__appColour(file, movements, 'movements')
+        self.__appColour(file, movements, 'movement')
         variables = self.__project.getPositionVariables(file)
-        self.__appColour(file, variables, 'variables')
+        self.__appColour(file, variables, 'variable')
         comments = self.__project.getPositionComments(file)
         self.__appColour(file, comments, 'comment')
+        simbols = self.__project.getPositionSimbols(file)
+        self.__appColour(file, simbols, 'simbol')
         
         
     def __appColour(self, program, elements, tag):

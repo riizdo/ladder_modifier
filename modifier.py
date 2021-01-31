@@ -53,44 +53,15 @@ class Program():
     def __formEditProgram(self, direction, name, comment):
         ini = 0
         counter = 1
-        outList = []
-        program = []
         
         lines = self.simpleProgram.split('\n')
         self.editProgram = self.simpleProgram
         for line in lines:
-            comment = {}
-            instruction = {}
-            movement = {}
-            variable = {}
-            words = line.split(' ')
-            for word in words:
-                nWord = len(word)
-                position = self.isInstruction(word)
-                if position != None:
-                    instruction['ini'] = '{}.{}'.format(counter, ini)
-                    instruction['end'] = '{}.{} + {}c'.format(counter, ini, position)
-                    self.positionInstructions.append(instruction)
-                position = self.isMovement(word)
-                if position != None:
-                    movement['ini'] = '{}.{}'.format(counter, ini)
-                    movement['end'] = '{}.{} + {}c'.format(counter, ini, position)
-                    self.positionMovements.append(movement)
-                position = self.isVariable(word)
-                if position != None:
-                    variable['ini'] = '{}.{}'.format(counter, ini)
-                    variable['end'] = '{}.{} + {}c'.format(counter, ini, position)
-                    self.positionVariables.append(variable)
-                ini += nWord + 1
-            
-            position = self.isComment(line)
-            if position != None:
-                comment['ini'] = '{}.{}'.format(counter, position['ini'])
-                comment['end'] = '{}.{} + {}c'.format(counter, position['ini'], position['nChars'])
-                self.positionComments.append(comment)
-                
+            positions = self.searchPositionLine(line, counter)
+            if positions != None and positions != []:
+                for pos in positions:
+                    self.positions.append(pos)
             counter += 1
-            ini = 0
         
         return 'ok'
     
@@ -103,7 +74,10 @@ class Program():
         ini = 0
         positions = []
         position = self.isComment(line)
-        posIni = 0
+        posIni = {}
+        
+        posIni['line'] = nLine
+        posIni['char'] = 0
         if position != None:
             comment = {}
             comment['ini'] = '{}.{}'.format(nLine, position['ini'])
@@ -113,9 +87,11 @@ class Program():
         words = line.split(' ')
         for word in words:
             position = self.searchPositionWord(word, posIni)
-            posIni += len(word) + 1
+            posIni['char'] += len(word) + 1
             if position != None:
-                pass
+                for pos in position:
+                    positions.append(pos)
+        return positions
     
     
     def searchPositionWord(self, word, posIni):
@@ -132,11 +108,12 @@ class Program():
                     for element in posSimbol:
                         positions.append(element)
                 else:
-                    return posVariable
+                    positions.append(posVariable)
             else:
-                return posMovement
+                positions.append(posMovement)
         else:
-            return posInstruction
+            positions.append(posInstruction)
+        return positions
             
             
     def isComment(self, text):
@@ -160,55 +137,75 @@ class Program():
         return None
     
     
-    def isInstruction(self, text, posIni):
+    def isInstruction(self, text, posIni = None):
+        pos = {}
         for instruction in self.instructions:
             if text == instruction:
-                return len(text)
+                pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
+                pos['end'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text))
+                pos['type'] = 'instruction'
+                return pos
         return None
                         
     
-    def isMovement(self, text, posIni):
+    def isMovement(self, text, posIni = None):
+        pos = {}
         for movement in self.movements:
             if text == movement:
-                return len(text)
+                pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
+                pos['end'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text))
+                pos['type'] = 'movement'
+                return pos
         return None
     
     
-    def isVariable(self, text, posIni):
+    def isVariable(self, text, posIni = None):
+        pos = {}
         for variable in self.variables:
+            ok = True
             if len(text) == len(variable):
                 for t, v in zip(text, variable):
                     if t != v and v != '*':
-                        return None
-                return len(text)
-            else:
-                return None
+                        ok = False
+                if ok == True:
+                    pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
+                    pos['end'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text))
+                    pos['type'] = 'variable'
+                    return pos
+        return None
     
     
-    def isSimbol(self, text, posIni):
+    def isSimbol(self, text, posIni = None):
         positions = []
-        nSimbol = 0
+        pos = {}
         text1 = text
         for simbol in self.simbols:
             if simbol == text:
-                positions.append(len(text))
+                pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
+                pos['ini'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text))
+                pos['type'] = 'simbol'
+                positions.append(pos)
                 return positions
-            result = text.split(simbol)
-            if len(result) <= 1:
-                return None
+            
+            actualChar = 0
             nSimbol = len(simbol)
-            nWord1 = len(result[0])
-            for item in result:
-                text1 = text
-                position = self.searchPositionWord(item)
-                if position != None:
-                    positions.append(position)
-                liststr = text1.split(item)
-                for element in liststr:
-                    if element != '':
-                        text1 = text1.split(element)
+            for i in range(actualChar, len(text) - (nSimbol - 1)):
+                word = ''
+                for a in range(actualChar, nSimbol):
+                    word += text[a]
+                if word == simbol:
+                    result = text.split(simbol)
+                    for element in result:
+                        position = self.searhPositionWord(element, posIni)
+                        if position != None:
+                            positions.append(position)
+            
             if text1 == simbol:
-                positions.append(text1)
+                pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
+                pos['end'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text1))
+                pos['type'] = 'simbol'
+                positions.append(pos)
+        
         return positions
     
     
@@ -222,12 +219,20 @@ class Program():
         return result
     
     
-    def __addWordPosition(self, position, word):#no finish----------------------------------------------
+    def __addWordPosition(self, position, word):
         pos = position.split('.')
         if len(pos) == 1:
             pos = int(pos[0])
         else:
             pos = int(pos[1])
+        word = int(word)
+        result = pos + word
+        result = str(result)
+        if len(pos) == 1:
+            result = '{}'.format(result)
+        else:
+            result = '{}.{}'.format(pos[0], result)
+        return result
     
     
     def __separateName(self, file):
@@ -247,23 +252,43 @@ class Program():
         
     
     def getPositionComments(self):
-        return self.positionComments
+        positions = []
+        for pos in self.positions:
+            if pos['type'] == 'comment':
+                positions.append(pos)
+        return positions
     
     
     def getPositionInstructions(self):
-        return self.positionInstructions
+        positions = []
+        for pos in self.positions:
+            if pos['type'] == 'instruction':
+                positions.append(pos)
+        return positions
     
     
     def getPositionMovements(self):
-        return self.positionMovements
+        positions = []
+        for pos in self.positions:
+            if pos['type'] == 'movement':
+                positions.append(pos)
+        return positions
     
     
     def getPositionVariables(self):
-        return self.positionVariables
+        positions = []
+        for pos in self.positions:
+            if pos['type'] == 'variable':
+                positions.append(pos)
+        return positions
     
     
     def getPositionSimbols(self):
-        return self.positionSimbols
+        positions = []
+        for pos in self.positions:
+            if pos['type'] == 'simbol':
+                positions.append(pos)
+        return positions
     
             
     def getTypeFile(self):
