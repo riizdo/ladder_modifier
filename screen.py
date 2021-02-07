@@ -17,6 +17,7 @@ class Screen(Frame):
         self.pack()
         self.master.geometry('1200x600+0+0')
         self.master.resizable(True, True)
+        self.master.protocol('WM_DELETE_WINDOW', self.__exit)
         #self.__fontInstruction = Font('arial')
         
         self.__indexMenuBar = []
@@ -29,6 +30,7 @@ class Screen(Frame):
         self.__optionComment = StringVar()
         self.__texts = text.TextLibrary()
         self.__textEditor = {}
+        self.__configuration = {}
         self.__project = ''
         
         self.master.title(self.__title + ' ' + self.__texts.getText('No project'))
@@ -43,6 +45,31 @@ class Screen(Frame):
             
         self.p = Button(self, text = 'hola', width = 10)
         self.p.pack()
+        
+        self.__config()
+        
+        
+    def __config(self):
+        config = ''
+        try:
+            with open('config.txt') as file:
+                config = file.read()
+        except:
+            print('no exists config.txt')
+            self.__optionDirection.set(True)
+            return None
+        configLine = config.split('\n')
+        for line in configLine:
+            if line != None and line != '' and line != []:
+                words = line.split(' ')
+                if words == 2:
+                    self.__configuration[words[0]] = words[1]
+                    
+                    
+    def __saveConfiguration(self):
+        with open('config.txt', 'w') as file:
+            for element in self.__configuration:
+                file.write(element + ' ' + self.__configuration[element])
         
         
     def __loadProyect(self):
@@ -99,7 +126,6 @@ class Screen(Frame):
     def __openFile(self, file):
         self.master.title(self.__title + ' ' + file)
         self.__textEditor[file] = Text(self.__noteBook)
-        print('openning file in screen: ', self.__project.getProgram(file, False, False, False))
         self.__textEditor[file].insert('insert', self.__project.getProgram(file, False, False, False))
         self.__defineColour(file)
         self.__noteBook.add(self.__textEditor[file], text = file)
@@ -114,7 +140,7 @@ class Screen(Frame):
         self.__textEditor[file].tag_config('comment', foreground = 'gray')
         self.__textEditor[file].tag_config('movement', foreground = 'royal blue')
         self.__textEditor[file].tag_config('variable', foreground = 'sea green')
-        self.__textEditor[file].tag_config('simbol', foreground = 'dark slate blue')
+        self.__textEditor[file].tag_config('simbol', foreground = 'yellow')
 
         instructions = self.__project.getPositionInstructions(file)
         self.__appColour(file, instructions, 'instruction')
@@ -179,6 +205,8 @@ class Screen(Frame):
     
     
     def __exit(self):
+        print('exiting')
+        self.__saveConfiguration()
         self.master.destroy()
         
         
@@ -210,13 +238,16 @@ class Screen(Frame):
         self.__viewMenu = Menu(self.__menuBar, tearoff = 0)
         self.__menuBar.add_cascade(label = self.__texts.getText('View'), menu = self.__viewMenu)
         self.__indexMenuBar.append(self.__menuBar.index('View'))
-        self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable directions'), variable = self.__optionDirection,\
+        self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable directions'),\
+                                        variable = self.__optionDirection,\
                                         onvalue = True, offvalue = False)
         self.__indexViewMenu.append(self.__viewMenu.index(self.__texts.getText('Variable directions')))
-        self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable names'), variable = self.__optionName,\
+        self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable names'),\
+                                        variable = self.__optionName,\
                                         onvalue = True, offvalue = False)
         self.__indexViewMenu.append(self.__viewMenu.index(self.__texts.getText('Variable names')))
-        self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable comments'), variable = self.__optionComment,\
+        self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable comments'),\
+                                        variable = self.__optionComment,\
                                         onvalue = True, offvalue = False)
         self.__indexViewMenu.append(self.__viewMenu.index(self.__texts.getText('Variable comments')))
 

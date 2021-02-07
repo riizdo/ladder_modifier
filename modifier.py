@@ -5,7 +5,7 @@
 
 import os
 
-
+'''************************************************CLASS PROGRAM**********************************'''
 class Program():
     def __init__(self, file = None):
         if file == None:
@@ -178,8 +178,12 @@ class Program():
     def isSimbol(self, text, posIni = None):
         positions = []
         pos = {}
-        text1 = text
+        posElement = {}
         for simbol in self.simbols:
+            nSimbol = len(simbol)
+            simbolPos = text.find(simbol)
+            textSimbol = ''
+            
             if simbol == text:
                 pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
                 pos['ini'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text))
@@ -187,26 +191,30 @@ class Program():
                 positions.append(pos)
                 return positions
             
-            actualChar = 0
-            nSimbol = len(simbol)
-            for i in range(actualChar, len(text) - (nSimbol - 1)):
-                word = ''
-                for a in range(actualChar, nSimbol):
-                    word += text[a]
-                if word == simbol:
-                    result = text.split(simbol)
-                    for element in result:
-                        position = self.searhPositionWord(element, posIni)
-                        if position != None:
-                            positions.append(position)
-            
-            if text1 == simbol:
-                pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
-                pos['end'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text1))
-                pos['type'] = 'simbol'
-                positions.append(pos)
-        
-        return positions
+            if simbolPos >= 0:
+                result = text.split(simbol)
+                counter = posIni['char']
+                for ele in posIni:
+                    posElement[ele] = posIni[ele]
+                for element in result:
+                    position = self.searchPositionWord(element, posElement)
+                    if position != None and position != []:
+                        for ele in position:
+                            positions.append(ele)
+                    counter += len(element)
+                    if counter == simbolPos + posIni['char']:
+                        counter += nSimbol
+                    posElement['char'] = counter
+                for i in range(simbolPos, simbolPos + nSimbol):
+                    textSimbol += text[i]
+                    
+                if textSimbol == simbol and textSimbol != '' and textSimbol != None:
+                    posIniSimbol = self.__addWordPosition(posIni, simbolPos)
+                    pos['ini'] = '{}'.format(posIniSimbol)
+                    pos['end'] = '{} + {}c'.format(posIniSimbol, nSimbol)
+                    pos['type'] = 'simbol'
+                    positions.append(pos)
+                return positions
     
     
     def __addLinePosition(self, position, line):
@@ -220,13 +228,19 @@ class Program():
     
     
     def __addWordPosition(self, position, word):
-        pos = position.split('.')
-        if len(pos) == 1:
-            pos = int(pos[0])
+        pos = []
+        positionType = type(position)
+        if positionType is dict:
+            for element in position:
+                pos.append(position[element])
         else:
-            pos = int(pos[1])
+            pos = position.split('.')
+        if len(pos) == 1:
+            value = int(pos[0])
+        else:
+            value = int(pos[1])
         word = int(word)
-        result = pos + word
+        result = value + word
         result = str(result)
         if len(pos) == 1:
             result = '{}'.format(result)
@@ -345,8 +359,7 @@ class Program():
             
             
             
-            
-        
+'''************************************************CLASS LADDER**********************************'''   
 class Ladder(Program):
     def __init__(self, file = None):
         Program.__init__(self, file)
@@ -613,7 +626,7 @@ class Ladder(Program):
         return self.__segments
     
     
-    
+'''***************************************************CLASS JOB*******************************************************'''    
     
     
 class Job(Program):
@@ -622,17 +635,17 @@ class Job(Program):
         self.instructions = ['IF', 'SET', 'GET', 'SETE', 'MUL', 'GETS',\
                              'GETE', 'IFTHEN', 'ENDIF', 'REFP', 'DOUT',\
                              'WAIT', 'PULSE', 'PAUSE', 'END', 'NOP', 'TIMER',\
-                             'DIN', 'SUB', 'CLEAR', 'INC']
+                             'DIN', 'SUB', 'CLEAR', 'INC', 'UNTIL', 'CALL', 'JOB']
         self.movements = ['MOVJ', 'MOVL', 'MOVC', 'IMOV', 'SFTON', 'SFTOF']
         self.comments = '/'
-        self.variables = ['B***', 'I***', 'D***', 'R***', 'P***']
-        self.simbols = ['=', '<=', '>=', '+', '-']
+        self.variables = ['B***', 'I***', 'D***', 'R***', 'P***', 'C*****', 'IN#(*)', 'OT#(*)']
+        self.simbols = ['<=', '>=', ':', '+', '-', '=', '<', '>']
         self.iniProgram = 'NOP'
         self.endProgram = 'END'
         self.extension = 'JBI'
 
 
-
+'''******************************************************CLASS VARIABLE***********************************************'''
 class Variable():
     def __init__(self, direction, comment = None, name =  None):
         self.__direction = direction
@@ -665,7 +678,7 @@ class Variable():
         
             
         
-
+'''*********************************************CLASS VARIABLE lIST*********************************'''
 class VariableList():
     def __init__(self):
         self.__originalList = ''
@@ -742,8 +755,7 @@ class VariableList():
         
         
         
-
-        
+'''**********************************************************CLASS PROJECT***************************************''' 
 class Project():
     def __init__(self, project = None, idElement = None):
         if idElement == None:
