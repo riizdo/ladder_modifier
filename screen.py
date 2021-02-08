@@ -57,19 +57,22 @@ class Screen(Frame):
         except:
             print('no exists config.txt')
             self.__optionDirection.set(True)
+            self.__selectLanguageEnglish()
             return None
         configLine = config.split('\n')
         for line in configLine:
             if line != None and line != '' and line != []:
                 words = line.split(' ')
-                if words == 2:
+                if len(words) == 2:
                     self.__configuration[words[0]] = words[1]
+        print(self.__configuration)
+        self.__chargeOptions()
                     
                     
     def __saveConfiguration(self):
         with open('config.txt', 'w') as file:
             for element in self.__configuration:
-                file.write(element + ' ' + self.__configuration[element])
+                file.write(element + ' ' + self.__configuration[element] + '\n')
         
         
     def __loadProyect(self):
@@ -210,6 +213,20 @@ class Screen(Frame):
         self.master.destroy()
         
         
+    def __selectOption(self):
+        self.__configuration['variableName'] = self.__optionName.get()
+        self.__configuration['variableDirection'] = self.__optionDirection.get()
+        self.__configuration['variableComment'] = self.__optionComment.get()
+        
+        
+    def __chargeOptions(self):
+        self.__optionName.set(self.__configuration['variableName'])
+        self.__optionDirection.set(self.__configuration['variableDirection'])
+        self.__optionComment.set(self.__configuration['variableComment'])
+        self.__texts.language(self.__configuration['language'])
+        self.__chargeTexts()
+        
+        
     def __createMenuBar(self):
         self.__menuBar = Menu(self)
         self.master.config(menu = self.__menuBar)
@@ -240,15 +257,18 @@ class Screen(Frame):
         self.__indexMenuBar.append(self.__menuBar.index('View'))
         self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable directions'),\
                                         variable = self.__optionDirection,\
-                                        onvalue = True, offvalue = False)
+                                        onvalue = True, offvalue = False,\
+                                        command = self.__selectOption)
         self.__indexViewMenu.append(self.__viewMenu.index(self.__texts.getText('Variable directions')))
         self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable names'),\
                                         variable = self.__optionName,\
-                                        onvalue = True, offvalue = False)
+                                        onvalue = True, offvalue = False,\
+                                        command = self.__selectOption)
         self.__indexViewMenu.append(self.__viewMenu.index(self.__texts.getText('Variable names')))
         self.__viewMenu.add_checkbutton(label = self.__texts.getText('Variable comments'),\
                                         variable = self.__optionComment,\
-                                        onvalue = True, offvalue = False)
+                                        onvalue = True, offvalue = False,\
+                                        command = self.__selectOption)
         self.__indexViewMenu.append(self.__viewMenu.index(self.__texts.getText('Variable comments')))
 
         self.__optionMenu = Menu(self.__menuBar, tearoff = 0)
@@ -266,12 +286,16 @@ class Screen(Frame):
     def __selectLanguageEnglish(self):
         language = self.__texts.languagesList()[0]
         error = self.__texts.language(language)
+        if error == 'ok':
+            self.__configuration['language'] = language
         self.__chargeTexts()
     
     
     def __selectLanguageSpanish(self):
         language = self.__texts.languagesList()[1]
         error = self.__texts.language(language)
+        if error == 'ok':
+            self.__configuration['language'] = language
         self.__chargeTexts()
         
         
