@@ -94,6 +94,7 @@ class Screen(Frame):
         job = self.__treeView.insert(item, 'end', text = self.__texts.getText('Jobs'), tag = 'types')
         ladder = self.__treeView.insert(item, 'end', text = self.__texts.getText('Ladder'), tag = 'types')
         other = self.__treeView.insert(item, 'end', text = self.__texts.getText('Others'), tag = 'types')
+        variables = self.__treeView.insert(item, 'end', text = self.__texts.getText('Variables'), tag = 'types')
         
         projectContent = self.__project.getJobsList()
         for element in projectContent:

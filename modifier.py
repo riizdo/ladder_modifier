@@ -141,6 +141,7 @@ class Program():
         pos = {}
         for instruction in self.instructions:
             if text == instruction:
+                pos['element'] = text
                 pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
                 pos['end'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text))
                 pos['type'] = 'instruction'
@@ -152,6 +153,7 @@ class Program():
         pos = {}
         for movement in self.movements:
             if text == movement:
+                pos['element'] = text
                 pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
                 pos['end'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text))
                 pos['type'] = 'movement'
@@ -168,6 +170,7 @@ class Program():
                     if t != v and v != '*':
                         ok = False
                 if ok == True:
+                    pos['element'] = text
                     pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
                     pos['end'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text))
                     pos['type'] = 'variable'
@@ -185,6 +188,7 @@ class Program():
             textSimbol = ''
             
             if simbol == text:
+                pos['element'] = text
                 pos['ini'] = '{}.{}'.format(posIni['line'], posIni['char'])
                 pos['ini'] = '{}.{} + {}c'.format(posIni['line'], posIni['char'], len(text))
                 pos['type'] = 'simbol'
@@ -210,6 +214,7 @@ class Program():
                     
                 if textSimbol == simbol and textSimbol != '' and textSimbol != None:
                     posIniSimbol = self.__addWordPosition(posIni, simbolPos)
+                    pos['element'] = textSimbol
                     pos['ini'] = '{}'.format(posIniSimbol)
                     pos['end'] = '{} + {}c'.format(posIniSimbol, nSimbol)
                     pos['type'] = 'simbol'
@@ -328,9 +333,12 @@ class Program():
     
     
     def getVariables(self):
-        return self.variables
-    
-    
+        variables = []
+        for element in self.__positions:
+            if element['type'] == 'variable':
+                variables.append(element)
+        return variables
+
     def getIniProgram(self):
         return self.iniProgram
     
@@ -816,6 +824,14 @@ class Project():
         if idElement == None:
             return self.idElement
         self.idElement = idElement
+        
+        
+    def __refreshVariables(self):#not finish-------------------------------------------
+        variables = []
+        for job in self.jobsList:
+            elements = self.jobsList[job].getVariables()
+            for element in elements:
+                variables.append(element)
     
     
     def getName(self):

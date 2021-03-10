@@ -61,4 +61,6 @@ class TextLibrary():
         self.__texts['Variable directions'] = {self.__languages[0]: 'Variable directions', self.__languages[1]: 'Direccion variables'}
         self.__texts['Variable names'] = {self.__languages[0]: 'Variable names', self.__languages[1]: 'Nombre variables'}
         self.__texts['Variable comments'] = {self.__languages[0]: 'Variable comments', self.__languages[1]: 'Comentarios variables'}
+        self.__texts['Variables'] = {self.__languages[0]: 'Variables', self.__languages[1]: 'Variables'}
+
         
