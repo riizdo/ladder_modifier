@@ -334,7 +334,7 @@ class Program():
     
     def getVariables(self):
         variables = []
-        for element in self.__positions:
+        for element in self.positions:
             if element['type'] == 'variable':
                 variables.append(element)
         return variables
@@ -726,6 +726,11 @@ class VariableList():
                 active = 'BP'
             elif line == '///EX':
                 active = 'EX'
+
+
+    def __str__(self):
+        variableList = '||'.join(self.__variableList)
+        return variableList
                 
                 
     def __readExistVariable(self, typeVar, line):
@@ -759,6 +764,10 @@ class VariableList():
         if name == None:
             return self.__variableList[direction].name()
         self.__variableList[direction].name(name)
+
+
+    def getVariables(self):
+        return self.__variableList
         
         
         
@@ -800,6 +809,7 @@ class Project():
                 self.ladder.readFile(f)
             elif file == 'VARNAME.DAT':
                 self.variableList.loadVariables(self.path + '/' + file)
+                print('variables in project: ', self.variableList)
                 self.otherFilesList.append(file)
             else:
                 self.otherFilesList.append(file)
@@ -863,10 +873,28 @@ class Project():
     
     
     def getVariableList(self):
-        return self.variableList
+        pass
+
+
+    def getVariableText(self):
+        self.__refreshVariables()
+        variableText = ''
+        variables = self.variableList.getVariables()
+        
+        for variable in variables:
+            text = ''
+            direction = variables[variable].direction()
+            name = variables[variable].name()
+            comment = variables[variable].comment()
+            text = '{} {} //{}\n'.format(direction, name, comment)
+            variableText += text
+
+        return variableText
     
     
     def getProgram(self, file, direction, name, comment):
+        if file == 'Variables':
+            return self.getVariableText()
         extension = self.__separateExtension(file)
         if extension == 'JBI':
             return self.jobsList[file].getProgram(direction, name, comment)
@@ -917,46 +945,4 @@ class Project():
     
     
 if __name__ == '__main__':
-    app = Ladder()
-    print('')
-    app.readFile(input('enter the name of archive: '))
-    
-    print('')
-    menus = app.getMenus()
-    text = 'select operation: ' + str(menus).upper()
-    menu = input(text).upper()
-    print('')
-    if menu == menus[0]:
-        dir1 = input('enter the direction: ')
-        print('')
-        dir2 = input('enter the other direction: ')
-        
-        app.showDirection(dir1)
-        print('')
-        app.showDirection(dir2)
-        print('')
-        if input('are you sure(y - n): ') != 'y':
-            app.exit()
-            
-        print('')
-        error = app.assignDirection(dir1, dir2)
-        
-        if error != 'ok':
-            print('')
-            print(error)
-            app.exit()
-            
-        app.writeFile('test1.txt')
-        print('')
-        print('change succesful')
-        
-    elif menu == menus[1]:
-        direction = input('enter the direction: ')
-        print('')
-        app.showDirection(direction)
-    elif menu == menus[2]:
-        app.exit()
-    else:
-        print('this menu is not correct')
-        app.exit()
-        
+    pass

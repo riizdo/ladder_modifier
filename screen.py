@@ -107,13 +107,9 @@ class Screen(Frame):
                 
                 
     def __doubleClickTreeView(self, event):
-        path = ''
         file = self.__treeView.selection()
         file = self.__treeView.item(file)['text']
-        '''
-        if self.__project.existsFile(file):
-            path = self.__project.getPath()
-        file = path + '/' + file'''
+        
         self.__openFile(file)
     
     
@@ -159,6 +155,8 @@ class Screen(Frame):
         
         
     def __appColour(self, program, elements, tag):
+        if elements == '' or elements == [] or elements == {} or elements == None:
+            return 'no elements of {} for aplicate colour'.format(tag)
         for element in elements:
             self.__textEditor[program].tag_add(tag, element['ini'], element['end'])
                 
